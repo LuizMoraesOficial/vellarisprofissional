@@ -110,14 +110,22 @@ export class MemStorage implements IStorage {
 
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
     const id = randomUUID();
-    const product: Product = { ...insertProduct, id };
+    const product: Product = { 
+      ...insertProduct, 
+      id,
+      featured: insertProduct.featured ?? null
+    };
     this.products.set(id, product);
     return product;
   }
 
   async createContact(insertContact: InsertContact): Promise<Contact> {
     const id = randomUUID();
-    const contact: Contact = { ...insertContact, id };
+    const contact: Contact = { 
+      ...insertContact, 
+      id,
+      phone: insertContact.phone ?? null
+    };
     this.contacts.set(id, contact);
     return contact;
   }
