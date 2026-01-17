@@ -45,7 +45,18 @@ The server handles:
 
 The schema includes:
 - `products` table: id, name, description, category, price, image, benefits array, featured flag
-- `contacts` table: id, name, email, phone, message
+- `contacts` table: id, name, email, phone, message, createdAt timestamp
+- `siteSettings` table: id, contactEmail, contactPhone, whatsapp, instagram, facebook, youtube, tiktok, address
+
+## Admin Panel
+
+The admin panel is accessible via hidden routes (no public links):
+- `/admin` - Login page (requires ADMIN_PASSWORD secret)
+- `/admin/dashboard` - Product management (CRUD)
+- `/admin/mensagens` - View and manage contact form submissions
+- `/admin/configuracoes` - Edit site settings (contact info, social media links)
+
+Admin authentication uses bearer tokens stored in localStorage with 24-hour expiry. The admin navigation provides seamless movement between sections with a premium dark theme and golden accents.
 
 ### Shared Code
 The `shared/` directory contains code used by both frontend and backend:
