@@ -12,6 +12,8 @@ import About from "@/pages/about";
 import Contact from "@/pages/contact";
 import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
+import AdminSettings from "@/pages/admin-settings";
+import AdminMessages from "@/pages/admin-messages";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -23,6 +25,8 @@ function Router() {
       <Route path="/contato" component={Contact} />
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/admin/configuracoes" component={AdminSettings} />
+      <Route path="/admin/mensagens" component={AdminMessages} />
       <Route component={NotFound} />
     </Switch>
   );

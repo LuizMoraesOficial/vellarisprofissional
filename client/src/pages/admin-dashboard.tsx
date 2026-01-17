@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { AdminNav } from "@/components/admin-nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -23,15 +24,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { 
   Plus, 
   Pencil, 
   Trash2, 
-  LogOut, 
   Package, 
   Loader2,
-  Save
+  Save,
+  Star
 } from "lucide-react";
 import type { Product } from "@shared/schema";
 
@@ -75,24 +76,13 @@ export default function AdminDashboard() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState<ProductFormData>(emptyFormData);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const token = localStorage.getItem("adminToken");
 
   useEffect(() => {
-    const token = localStorage.getItem("admin_token");
     if (!token) {
       setLocation("/admin");
     }
-  }, [setLocation]);
-
-  useEffect(() => {
-    const handleUnauthorized = (event: CustomEvent) => {
-      localStorage.removeItem("admin_token");
-      setLocation("/admin");
-      toast({ title: "Sessão expirada", description: "Faça login novamente", variant: "destructive" });
-    };
-    
-    window.addEventListener("admin-unauthorized" as any, handleUnauthorized);
-    return () => window.removeEventListener("admin-unauthorized" as any, handleUnauthorized);
-  }, [setLocation, toast]);
+  }, [token, setLocation]);
 
   const { data: products, isLoading } = useQuery<Product[]>({
     queryKey: ["/api/products"],
@@ -100,7 +90,7 @@ export default function AdminDashboard() {
 
   const handleApiResponse = async (response: Response) => {
     if (response.status === 401) {
-      localStorage.removeItem("admin_token");
+      localStorage.removeItem("adminToken");
       setLocation("/admin");
       throw new Error("Unauthorized");
     }
@@ -110,7 +100,6 @@ export default function AdminDashboard() {
 
   const createMutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
-      const token = localStorage.getItem("admin_token");
       const response = await fetch("/api/admin/products", {
         method: "POST",
         headers: {
@@ -142,7 +131,6 @@ export default function AdminDashboard() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: ProductFormData }) => {
-      const token = localStorage.getItem("admin_token");
       const response = await fetch(`/api/admin/products/${id}`, {
         method: "PUT",
         headers: {
@@ -175,7 +163,6 @@ export default function AdminDashboard() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const token = localStorage.getItem("admin_token");
       const response = await fetch(`/api/admin/products/${id}`, {
         method: "DELETE",
         headers: {
@@ -194,7 +181,7 @@ export default function AdminDashboard() {
   });
 
   const handleLogout = () => {
-    localStorage.removeItem("admin_token");
+    localStorage.removeItem("adminToken");
     setLocation("/admin");
   };
 
@@ -235,60 +222,56 @@ export default function AdminDashboard() {
 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
-  return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-card border-b border-border sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <Package className="h-6 w-6 text-primary" />
-              <h1 className="font-serif text-xl font-medium">VELLARIS Admin</h1>
-            </div>
-            <Button variant="ghost" onClick={handleLogout} data-testid="button-admin-logout">
-              <LogOut className="h-4 w-4 mr-2" />
-              Sair
-            </Button>
-          </div>
-        </div>
-      </header>
+  if (!token) return null;
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black">
+      <AdminNav onLogout={handleLogout} />
+
+      <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-semibold">Gerenciar Produtos</h2>
-            <p className="text-muted-foreground">
+            <h1 className="text-3xl font-serif font-bold text-white mb-2">
+              Gerenciar Produtos
+            </h1>
+            <p className="text-gray-400">
               {products?.length || 0} produtos cadastrados
             </p>
           </div>
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={handleNewProduct} data-testid="button-add-product">
-                <Plus className="h-4 w-4 mr-2" />
+              <Button 
+                onClick={handleNewProduct} 
+                className="bg-gold text-black hover:bg-gold/90 gap-2"
+                data-testid="button-add-product"
+              >
+                <Plus className="h-4 w-4" />
                 Novo Produto
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800">
               <DialogHeader>
-                <DialogTitle>
+                <DialogTitle className="text-white">
                   {editingProduct ? "Editar Produto" : "Novo Produto"}
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nome do Produto</Label>
+                  <Label htmlFor="name" className="text-gray-300">Nome do Produto</Label>
                   <Input
                     id="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Ex: Shampoo Reparador"
                     required
+                    className="bg-gray-800 border-gray-700 text-white focus:border-gold"
                     data-testid="input-product-name"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Descrição</Label>
+                  <Label htmlFor="description" className="text-gray-300">Descrição</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
@@ -296,23 +279,24 @@ export default function AdminDashboard() {
                     placeholder="Descrição do produto..."
                     rows={3}
                     required
+                    className="bg-gray-800 border-gray-700 text-white focus:border-gold resize-none"
                     data-testid="input-product-description"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="category">Categoria</Label>
+                    <Label htmlFor="category" className="text-gray-300">Categoria</Label>
                     <Select
                       value={formData.category}
                       onValueChange={(value) => setFormData({ ...formData, category: value })}
                     >
-                      <SelectTrigger data-testid="select-product-category">
+                      <SelectTrigger className="bg-gray-800 border-gray-700 text-white" data-testid="select-product-category">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-gray-800 border-gray-700">
                         {categories.map((cat) => (
-                          <SelectItem key={cat} value={cat}>
+                          <SelectItem key={cat} value={cat} className="text-white hover:bg-gray-700">
                             {cat}
                           </SelectItem>
                         ))}
@@ -321,63 +305,69 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="price">Preço (R$)</Label>
+                    <Label htmlFor="price" className="text-gray-300">Preço (R$)</Label>
                     <Input
                       id="price"
                       value={formData.price}
                       onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                       placeholder="89,00"
                       required
+                      className="bg-gray-800 border-gray-700 text-white focus:border-gold"
                       data-testid="input-product-price"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="image">URL da Imagem</Label>
+                  <Label htmlFor="image" className="text-gray-300">URL da Imagem</Label>
                   <Input
                     id="image"
                     value={formData.image}
                     onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                     placeholder="/products/shampoo.jpg"
+                    className="bg-gray-800 border-gray-700 text-white focus:border-gold"
                     data-testid="input-product-image"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="benefits">Benefícios (um por linha)</Label>
+                  <Label htmlFor="benefits" className="text-gray-300">Benefícios (um por linha)</Label>
                   <Textarea
                     id="benefits"
                     value={formData.benefits}
                     onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
                     placeholder="Hidratação intensa&#10;Brilho natural&#10;Proteção térmica"
                     rows={4}
+                    className="bg-gray-800 border-gray-700 text-white focus:border-gold resize-none"
                     data-testid="input-product-benefits"
                   />
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-800/50 border border-gray-700">
                   <Switch
                     id="featured"
                     checked={formData.featured}
                     onCheckedChange={(checked) => setFormData({ ...formData, featured: checked })}
                     data-testid="switch-product-featured"
                   />
-                  <Label htmlFor="featured">Produto em destaque</Label>
+                  <Label htmlFor="featured" className="text-gray-300 flex items-center gap-2">
+                    <Star className="w-4 h-4 text-gold" />
+                    Produto em destaque
+                  </Label>
                 </div>
 
                 <div className="flex gap-3 pt-4">
                   <Button
                     type="button"
                     variant="outline"
-                    className="flex-1"
+                    className="flex-1 border-gray-700 text-gray-300 hover:bg-gray-800"
                     onClick={() => setIsDialogOpen(false)}
                   >
                     Cancelar
                   </Button>
                   <Button 
                     type="submit" 
-                    className="flex-1" 
+                    className="flex-1 bg-gold text-black hover:bg-gold/90" 
                     disabled={isPending}
                     data-testid="button-save-product"
                   >
@@ -401,60 +391,83 @@ export default function AdminDashboard() {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-gold" />
           </div>
         ) : products && products.length > 0 ? (
-          <div className="grid gap-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {products.map((product) => (
-              <Card key={product.id} className="p-4 border-0 bg-card" data-testid={`admin-product-${product.id}`}>
-                <div className="flex items-center gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold">{product.name}</h3>
-                      {product.featured && (
-                        <Badge variant="secondary" className="text-xs">Destaque</Badge>
-                      )}
+              <Card 
+                key={product.id} 
+                className="bg-gray-900/50 border-gray-800 hover:border-gold/40 transition-all duration-300 group golden-glow overflow-visible"
+                data-testid={`admin-product-${product.id}`}
+              >
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-white group-hover:text-gold transition-colors">
+                          {product.name}
+                        </h3>
+                        {product.featured && (
+                          <Star className="w-4 h-4 text-gold fill-gold" />
+                        )}
+                      </div>
+                      <Badge variant="secondary" className="bg-gray-800 text-gray-300 text-xs">
+                        {product.category}
+                      </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground line-clamp-1">
-                      {product.description}
-                    </p>
-                    <div className="flex items-center gap-3 mt-2">
-                      <span className="text-sm font-medium">{formatPrice(product.price)}</span>
-                      <Badge variant="outline" className="text-xs">{product.category}</Badge>
-                    </div>
+                    <span className="text-lg font-bold text-gold">
+                      {formatPrice(product.price)}
+                    </span>
                   </div>
+                  
+                  <p className="text-sm text-gray-400 line-clamp-2 mb-4">
+                    {product.description}
+                  </p>
+
                   <div className="flex items-center gap-2">
                     <Button
                       variant="ghost"
-                      size="icon"
+                      size="sm"
                       onClick={() => handleEdit(product)}
+                      className="flex-1 text-gray-400 hover:text-white hover:bg-gray-800 gap-2"
                       data-testid={`button-edit-product-${product.id}`}
                     >
                       <Pencil className="h-4 w-4" />
+                      Editar
                     </Button>
                     <Button
                       variant="ghost"
-                      size="icon"
+                      size="sm"
                       onClick={() => handleDelete(product.id)}
-                      className="text-destructive"
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                       data-testid={`button-delete-product-${product.id}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                </div>
+                </CardContent>
               </Card>
             ))}
           </div>
         ) : (
-          <div className="text-center py-16">
-            <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">Nenhum produto cadastrado.</p>
-            <Button onClick={handleNewProduct} className="mt-4">
-              <Plus className="h-4 w-4 mr-2" />
-              Adicionar primeiro produto
-            </Button>
-          </div>
+          <Card className="bg-gray-900/50 border-gray-800">
+            <CardContent className="flex flex-col items-center justify-center py-20">
+              <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                <Package className="w-8 h-8 text-gray-500" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-300 mb-2">
+                Nenhum produto cadastrado
+              </h3>
+              <p className="text-gray-500 text-center max-w-md mb-4">
+                Comece adicionando seus produtos para exibi-los no site.
+              </p>
+              <Button onClick={handleNewProduct} className="bg-gold text-black hover:bg-gold/90 gap-2">
+                <Plus className="h-4 w-4" />
+                Adicionar primeiro produto
+              </Button>
+            </CardContent>
+          </Card>
         )}
       </main>
     </div>
