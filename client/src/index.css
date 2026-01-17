@@ -284,4 +284,12 @@
   .border-gold {
     border-color: hsl(43 74% 49%);
   }
+
+  .golden-glow {
+    transition: all 0.3s ease;
+  }
+
+  .golden-glow:hover {
+    box-shadow: 0 0 20px hsl(43 74% 49% / 0.5), 0 0 40px hsl(43 74% 49% / 0.3);
+  }
 }
