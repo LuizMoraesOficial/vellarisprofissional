@@ -11,6 +11,8 @@ export interface IStorage {
   getProductById(id: string): Promise<Product | undefined>;
   getProductsByCategory(category: string): Promise<Product[]>;
   createProduct(product: InsertProduct): Promise<Product>;
+  updateProduct(id: string, product: Partial<InsertProduct>): Promise<Product | undefined>;
+  deleteProduct(id: string): Promise<boolean>;
   createContact(contact: InsertContact): Promise<Contact>;
   getAllContacts(): Promise<Contact[]>;
 }
@@ -117,6 +119,24 @@ export class MemStorage implements IStorage {
     };
     this.products.set(id, product);
     return product;
+  }
+
+  async updateProduct(id: string, updates: Partial<InsertProduct>): Promise<Product | undefined> {
+    const existing = this.products.get(id);
+    if (!existing) return undefined;
+    
+    const updated: Product = {
+      ...existing,
+      ...updates,
+      id,
+      featured: updates.featured !== undefined ? updates.featured : existing.featured,
+    };
+    this.products.set(id, updated);
+    return updated;
+  }
+
+  async deleteProduct(id: string): Promise<boolean> {
+    return this.products.delete(id);
   }
 
   async createContact(insertContact: InsertContact): Promise<Contact> {
