@@ -56,7 +56,18 @@ export default function AdminMessages() {
   const { data: contacts, isLoading } = useQuery<Contact[]>({
     queryKey: ["/api/admin/contacts"],
     enabled: !!token,
-    meta: { headers: { Authorization: `Bearer ${token}` } },
+    queryFn: async () => {
+      const res = await fetch("/api/admin/contacts", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.status === 401) {
+        localStorage.removeItem("adminToken");
+        setLocation("/admin");
+        throw new Error("Unauthorized");
+      }
+      if (!res.ok) throw new Error("Failed to fetch contacts");
+      return res.json();
+    },
   });
 
   const deleteMutation = useMutation({

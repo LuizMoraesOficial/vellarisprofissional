@@ -48,7 +48,18 @@ export default function AdminSettings() {
   const { data: settings, isLoading } = useQuery<SiteSettings>({
     queryKey: ["/api/admin/settings"],
     enabled: !!token,
-    meta: { headers: { Authorization: `Bearer ${token}` } },
+    queryFn: async () => {
+      const res = await fetch("/api/admin/settings", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.status === 401) {
+        localStorage.removeItem("adminToken");
+        setLocation("/admin");
+        throw new Error("Unauthorized");
+      }
+      if (!res.ok) throw new Error("Failed to fetch settings");
+      return res.json();
+    },
   });
 
   useEffect(() => {
