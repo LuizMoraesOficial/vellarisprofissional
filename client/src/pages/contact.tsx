@@ -1,34 +1,50 @@
+import { useQuery } from "@tanstack/react-query";
 import { ContactForm } from "@/components/contact-form";
-import { Mail, Phone, MapPin, Clock } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, Loader2 } from "lucide-react";
 
-const contactInfo = [
-  {
-    icon: Mail,
-    title: "Email",
-    content: "contato@vellaris.com.br",
-    subtitle: "Respondemos em até 24h",
-  },
-  {
-    icon: Phone,
-    title: "Telefone",
-    content: "+55 (11) 99999-9999",
-    subtitle: "Seg a Sex, 9h às 18h",
-  },
-  {
-    icon: MapPin,
-    title: "Endereço",
-    content: "São Paulo, SP",
-    subtitle: "Brasil",
-  },
-  {
-    icon: Clock,
-    title: "Horário",
-    content: "Seg - Sex: 9h às 18h",
-    subtitle: "Sáb: 9h às 13h",
-  },
-];
+interface PublicSettings {
+  contactEmail: string;
+  contactPhone: string;
+  whatsapp: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  youtube: string | null;
+  tiktok: string | null;
+  address: string | null;
+}
 
 export default function Contact() {
+  const { data: settings, isLoading } = useQuery<PublicSettings>({
+    queryKey: ["/api/settings/public"],
+  });
+
+  const contactInfo = [
+    {
+      icon: Mail,
+      title: "Email",
+      content: settings?.contactEmail || "contato@vellaris.com.br",
+      subtitle: "Respondemos em até 24h",
+    },
+    {
+      icon: Phone,
+      title: "Telefone",
+      content: settings?.contactPhone || "+55 (11) 99999-9999",
+      subtitle: "Seg a Sex, 9h às 18h",
+    },
+    {
+      icon: MapPin,
+      title: "Endereço",
+      content: settings?.address?.split(" - ")[0] || "São Paulo, SP",
+      subtitle: settings?.address?.split(" - ")[1] || "Brasil",
+    },
+    {
+      icon: Clock,
+      title: "Horário",
+      content: "Seg - Sex: 9h às 18h",
+      subtitle: "Sáb: 9h às 13h",
+    },
+  ];
+
   return (
     <main className="pt-20 md:pt-24">
       <section className="py-16 bg-card">
@@ -56,24 +72,30 @@ export default function Contact() {
                 Informações de Contato
               </h2>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
-                {contactInfo.map((info, index) => (
-                  <div 
-                    key={index} 
-                    className="flex items-start gap-4"
-                    data-testid={`contact-info-${index}`}
-                  >
-                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                      <info.icon className="h-5 w-5 text-primary" />
+              {isLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
+                  {contactInfo.map((info, index) => (
+                    <div 
+                      key={index} 
+                      className="flex items-start gap-4"
+                      data-testid={`contact-info-${index}`}
+                    >
+                      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                        <info.icon className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{info.title}</p>
+                        <p className="text-foreground">{info.content}</p>
+                        <p className="text-sm text-muted-foreground">{info.subtitle}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">{info.title}</p>
-                      <p className="text-foreground">{info.content}</p>
-                      <p className="text-sm text-muted-foreground">{info.subtitle}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
               <div className="bg-card rounded-md p-6">
                 <h3 className="font-medium mb-4">Para Profissionais</h3>

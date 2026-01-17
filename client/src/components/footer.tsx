@@ -1,7 +1,24 @@
 import { Link } from "wouter";
-import { Instagram, Facebook, Mail, Phone, MapPin } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Instagram, Facebook, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import { SiTiktok } from "react-icons/si";
+
+interface PublicSettings {
+  contactEmail: string;
+  contactPhone: string;
+  whatsapp: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  youtube: string | null;
+  tiktok: string | null;
+  address: string | null;
+}
 
 export function Footer() {
+  const { data: settings } = useQuery<PublicSettings>({
+    queryKey: ["/api/settings/public"],
+  });
+
   return (
     <footer className="bg-foreground text-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -44,16 +61,18 @@ export function Footer() {
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2 text-background/70 text-sm">
                 <Mail className="h-4 w-4" />
-                <span>contato@vellaris.com.br</span>
+                <span>{settings?.contactEmail || "contato@vellaris.com.br"}</span>
               </div>
               <div className="flex items-center gap-2 text-background/70 text-sm">
                 <Phone className="h-4 w-4" />
-                <span>+55 (11) 99999-9999</span>
+                <span>{settings?.contactPhone || "+55 (11) 99999-9999"}</span>
               </div>
-              <div className="flex items-center gap-2 text-background/70 text-sm">
-                <MapPin className="h-4 w-4" />
-                <span>São Paulo, Brasil</span>
-              </div>
+              {settings?.address && (
+                <div className="flex items-center gap-2 text-background/70 text-sm">
+                  <MapPin className="h-4 w-4" />
+                  <span>{settings.address}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -62,20 +81,68 @@ export function Footer() {
               Redes Sociais
             </h4>
             <div className="flex gap-4">
-              <a 
-                href="#" 
-                className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center hover-elevate"
-                data-testid="link-instagram"
-              >
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a 
-                href="#" 
-                className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center hover-elevate"
-                data-testid="link-facebook"
-              >
-                <Facebook className="h-5 w-5" />
-              </a>
+              {settings?.instagram && (
+                <a 
+                  href={settings.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center hover-elevate"
+                  data-testid="link-instagram"
+                >
+                  <Instagram className="h-5 w-5" />
+                </a>
+              )}
+              {settings?.facebook && (
+                <a 
+                  href={settings.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center hover-elevate"
+                  data-testid="link-facebook"
+                >
+                  <Facebook className="h-5 w-5" />
+                </a>
+              )}
+              {settings?.youtube && (
+                <a 
+                  href={settings.youtube}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center hover-elevate"
+                  data-testid="link-youtube"
+                >
+                  <Youtube className="h-5 w-5" />
+                </a>
+              )}
+              {settings?.tiktok && (
+                <a 
+                  href={settings.tiktok}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center hover-elevate"
+                  data-testid="link-tiktok"
+                >
+                  <SiTiktok className="h-5 w-5" />
+                </a>
+              )}
+              {!settings?.instagram && !settings?.facebook && !settings?.youtube && !settings?.tiktok && (
+                <>
+                  <a 
+                    href="#" 
+                    className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center hover-elevate"
+                    data-testid="link-instagram"
+                  >
+                    <Instagram className="h-5 w-5" />
+                  </a>
+                  <a 
+                    href="#" 
+                    className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center hover-elevate"
+                    data-testid="link-facebook"
+                  >
+                    <Facebook className="h-5 w-5" />
+                  </a>
+                </>
+              )}
             </div>
           </div>
         </div>
