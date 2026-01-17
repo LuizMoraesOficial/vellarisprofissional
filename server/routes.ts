@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContactSchema, insertProductSchema } from "@shared/schema";
+import { insertContactSchema, insertProductSchema, insertSettingsSchema } from "@shared/schema";
 import { z } from "zod";
 import { randomBytes } from "crypto";
 
@@ -162,6 +162,86 @@ export async function registerRoutes(
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete product" });
+    }
+  });
+
+  app.get("/api/admin/contacts", verifyAdminToken, async (req, res) => {
+    try {
+      const contacts = await storage.getAllContacts();
+      res.json(contacts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch contacts" });
+    }
+  });
+
+  app.get("/api/admin/contacts/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const contact = await storage.getContactById(id);
+      
+      if (!contact) {
+        return res.status(404).json({ error: "Contact not found" });
+      }
+      
+      res.json(contact);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch contact" });
+    }
+  });
+
+  app.delete("/api/admin/contacts/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteContact(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ error: "Contact not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete contact" });
+    }
+  });
+
+  app.get("/api/admin/settings", verifyAdminToken, async (req, res) => {
+    try {
+      const settings = await storage.getSettings();
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch settings" });
+    }
+  });
+
+  app.put("/api/admin/settings", verifyAdminToken, async (req, res) => {
+    try {
+      const updateSchema = insertSettingsSchema.partial();
+      const validatedUpdates = updateSchema.parse(req.body);
+      const settings = await storage.updateSettings(validatedUpdates);
+      res.json(settings);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update settings" });
+    }
+  });
+
+  app.get("/api/settings/public", async (req, res) => {
+    try {
+      const settings = await storage.getSettings();
+      res.json({
+        contactEmail: settings.contactEmail,
+        contactPhone: settings.contactPhone,
+        whatsapp: settings.whatsapp,
+        instagram: settings.instagram,
+        facebook: settings.facebook,
+        youtube: settings.youtube,
+        tiktok: settings.tiktok,
+        address: settings.address,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch settings" });
     }
   });
 
