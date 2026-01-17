@@ -34,7 +34,7 @@ export function Header() {
             {navLinks.map((link) => (
               <Link key={link.href} href={link.href}>
                 <span
-                  className={`text-sm font-medium tracking-wide cursor-pointer transition-colors hover:text-primary ${
+                  className={`text-sm font-medium tracking-wide cursor-pointer transition-colors hover:text-primary nav-link-glow ${
                     location === link.href ? "text-primary" : "text-foreground"
                   }`}
                   data-testid={`link-nav-${link.label.toLowerCase()}`}

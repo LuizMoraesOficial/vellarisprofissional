@@ -292,4 +292,30 @@
   .golden-glow:hover {
     box-shadow: 0 0 20px hsl(43 74% 49% / 0.5), 0 0 40px hsl(43 74% 49% / 0.3);
   }
+
+  .nav-link-glow {
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .nav-link-glow::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, hsl(43 74% 49%), transparent);
+    box-shadow: 0 0 10px hsl(43 74% 49% / 0.8), 0 0 20px hsl(43 74% 49% / 0.5);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+  }
+
+  .nav-link-glow:hover::after {
+    width: 100%;
+  }
+
+  .nav-link-glow:hover {
+    text-shadow: 0 0 10px hsl(43 74% 49% / 0.5);
+  }
 }
