@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { Instagram, Facebook, Youtube, Mail, Phone, MapPin } from "lucide-react";
-import { SiTiktok } from "react-icons/si";
+import { Instagram, Facebook, Youtube, Mail, Phone, MapPin, MessageCircle } from "lucide-react";
+import { SiTiktok, SiWhatsapp } from "react-icons/si";
 
 interface PublicSettings {
   contactEmail: string;
@@ -80,7 +80,19 @@ export function Footer() {
             <h4 className="font-semibold text-sm uppercase tracking-wider mb-4">
               Redes Sociais
             </h4>
-            <div className="flex gap-4">
+            <div className="flex gap-4 flex-wrap">
+              {settings?.whatsapp && (
+                <a 
+                  href={`https://wa.me/${settings.whatsapp}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center hover:bg-green-500/40 transition-colors golden-glow"
+                  data-testid="link-whatsapp"
+                  title="Fale conosco no WhatsApp"
+                >
+                  <SiWhatsapp className="h-5 w-5 text-green-400" />
+                </a>
+              )}
               {settings?.instagram && (
                 <a 
                   href={settings.instagram}
