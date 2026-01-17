@@ -2,7 +2,9 @@ import {
   type Product, 
   type InsertProduct, 
   type Contact, 
-  type InsertContact 
+  type InsertContact,
+  type SiteSettings,
+  type InsertSettings
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -15,15 +17,31 @@ export interface IStorage {
   deleteProduct(id: string): Promise<boolean>;
   createContact(contact: InsertContact): Promise<Contact>;
   getAllContacts(): Promise<Contact[]>;
+  getContactById(id: string): Promise<Contact | undefined>;
+  deleteContact(id: string): Promise<boolean>;
+  getSettings(): Promise<SiteSettings>;
+  updateSettings(settings: Partial<InsertSettings>): Promise<SiteSettings>;
 }
 
 export class MemStorage implements IStorage {
   private products: Map<string, Product>;
   private contacts: Map<string, Contact>;
+  private settings: SiteSettings;
 
   constructor() {
     this.products = new Map();
     this.contacts = new Map();
+    this.settings = {
+      id: "main",
+      contactEmail: "contato@vellaris.com.br",
+      contactPhone: "(11) 99999-9999",
+      whatsapp: "5511999999999",
+      instagram: "https://instagram.com/vellaris",
+      facebook: "https://facebook.com/vellaris",
+      youtube: null,
+      tiktok: null,
+      address: "Av. Paulista, 1000 - São Paulo, SP",
+    };
     this.seedProducts();
   }
 
@@ -144,14 +162,40 @@ export class MemStorage implements IStorage {
     const contact: Contact = { 
       ...insertContact, 
       id,
-      phone: insertContact.phone ?? null
+      phone: insertContact.phone ?? null,
+      createdAt: new Date()
     };
     this.contacts.set(id, contact);
     return contact;
   }
 
   async getAllContacts(): Promise<Contact[]> {
-    return Array.from(this.contacts.values());
+    const contacts = Array.from(this.contacts.values());
+    return contacts.sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
+    });
+  }
+
+  async getContactById(id: string): Promise<Contact | undefined> {
+    return this.contacts.get(id);
+  }
+
+  async deleteContact(id: string): Promise<boolean> {
+    return this.contacts.delete(id);
+  }
+
+  async getSettings(): Promise<SiteSettings> {
+    return this.settings;
+  }
+
+  async updateSettings(updates: Partial<InsertSettings>): Promise<SiteSettings> {
+    this.settings = {
+      ...this.settings,
+      ...updates,
+    };
+    return this.settings;
   }
 }
 
