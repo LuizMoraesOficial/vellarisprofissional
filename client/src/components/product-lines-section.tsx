@@ -19,8 +19,7 @@ const productLines = [
     bgGradient: "from-orange-500/20 via-orange-400/10 to-transparent",
     borderColor: "border-orange-500/30",
     textColor: "text-orange-500",
-    hoverBorder: "hover:border-orange-400",
-    buttonBg: "bg-orange-500 hover:bg-orange-600",
+    buttonClasses: "bg-orange-500 border-orange-500 text-white",
     defaultImage: "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=600",
     settingsKey: "fiberForceImage" as keyof PublicSettings,
   },
@@ -33,8 +32,7 @@ const productLines = [
     bgGradient: "from-purple-500/20 via-purple-400/10 to-transparent",
     borderColor: "border-purple-500/30",
     textColor: "text-purple-500",
-    hoverBorder: "hover:border-purple-400",
-    buttonBg: "bg-purple-500 hover:bg-purple-600",
+    buttonClasses: "bg-purple-500 border-purple-500 text-white",
     defaultImage: "https://images.unsplash.com/photo-1519735777090-ec97162dc266?w=600",
     settingsKey: "hydraBalanceImage" as keyof PublicSettings,
   },
@@ -47,8 +45,7 @@ const productLines = [
     bgGradient: "from-yellow-500/20 via-amber-400/10 to-transparent",
     borderColor: "border-yellow-500/30",
     textColor: "text-yellow-500",
-    hoverBorder: "hover:border-yellow-400",
-    buttonBg: "bg-yellow-500 hover:bg-yellow-600",
+    buttonClasses: "bg-yellow-500 border-yellow-500 text-black",
     defaultImage: "https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=600",
     settingsKey: "nutriOilImage" as keyof PublicSettings,
   },
@@ -89,7 +86,7 @@ export function ProductLinesSection() {
             return (
               <div 
                 key={line.id}
-                className={`group relative overflow-hidden rounded-2xl border-2 ${line.borderColor} ${line.hoverBorder} bg-card dark:bg-gray-900/50 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2`}
+                className={`group relative overflow-hidden rounded-md border-2 ${line.borderColor} bg-card dark:bg-gray-900/50 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2`}
                 data-testid={`card-line-${line.id}`}
               >
                 <div className="relative h-48 overflow-hidden">
@@ -116,7 +113,7 @@ export function ProductLinesSection() {
                   
                   <Link href={`/linha/${line.id}`}>
                     <Button 
-                      className={`w-full ${line.buttonBg} text-white font-medium shadow-lg group/btn`}
+                      className={`w-full ${line.buttonClasses} font-medium shadow-lg group/btn`}
                       data-testid={`button-line-${line.id}`}
                     >
                       Explorar linha
