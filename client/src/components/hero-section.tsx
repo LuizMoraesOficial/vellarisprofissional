@@ -20,13 +20,13 @@ export function HeroSection() {
           <div className="flex items-center gap-2 mb-6">
             <Sparkles className="h-5 w-5 text-primary" />
             <span className="text-primary text-sm font-medium uppercase tracking-widest">
-              Performance profissional para cabelos exigentes.
+              Professional Hair Care
             </span>
           </div>
 
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium text-white leading-tight mb-6">
-            Transforme seus
-            <span className="block text-primary">cabelos</span>
+            Performance profissional para
+            <span className="block text-primary">cabelos exigentes</span>
           </h1>
 
           <p className="text-lg sm:text-xl text-white/80 leading-relaxed mb-8 max-w-lg">
