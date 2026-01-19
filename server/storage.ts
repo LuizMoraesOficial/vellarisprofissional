@@ -12,6 +12,7 @@ export interface IStorage {
   getAllProducts(): Promise<Product[]>;
   getProductById(id: string): Promise<Product | undefined>;
   getProductsByCategory(category: string): Promise<Product[]>;
+  getProductsByLine(line: string): Promise<Product[]>;
   createProduct(product: InsertProduct): Promise<Product>;
   updateProduct(id: string, product: Partial<InsertProduct>): Promise<Product | undefined>;
   deleteProduct(id: string): Promise<boolean>;
@@ -49,62 +50,68 @@ export class MemStorage implements IStorage {
     const products: Product[] = [
       {
         id: "1",
-        name: "Shampoo Reparador Profissional",
+        name: "Shampoo Fiber Force",
         description: "Limpeza profunda com tecnologia de reconstrução molecular para cabelos danificados. Fórmula enriquecida com queratina e aminoácidos.",
         category: "Tratamento",
+        line: "fiber-force",
         price: 8900,
         image: "/products/shampoo.jpg",
-        benefits: ["Reconstrução molecular", "Limpeza profunda", "Hidratação intensa", "Fortalecimento"],
+        benefits: ["Reconstrução molecular", "Limpeza profunda", "Fortalecimento", "Anti-quebra"],
         featured: true,
       },
       {
         id: "2",
-        name: "Máscara Nutritiva Intensiva",
-        description: "Tratamento intensivo com queratina hidrolisada e óleos essenciais de argan e macadâmia para nutrição profunda.",
-        category: "Hidratação",
+        name: "Máscara Fiber Force",
+        description: "Tratamento intensivo com queratina hidrolisada para reconstrução profunda de cabelos muito danificados.",
+        category: "Tratamento",
+        line: "fiber-force",
         price: 12900,
         image: "/products/mascara.jpg",
-        benefits: ["Nutrição profunda", "Brilho intenso", "Maciez prolongada", "Redução de frizz"],
+        benefits: ["Reconstrução intensa", "Força e resistência", "Elasticidade", "Recuperação"],
         featured: true,
       },
       {
         id: "3",
-        name: "Sérum Finalizador Premium",
-        description: "Proteção térmica e controle do frizz com tecnologia anti-quebra. Proteção até 230°C.",
-        category: "Finalização",
-        price: 7500,
-        image: "/products/serum.jpg",
-        benefits: ["Proteção térmica", "Anti-frizz", "Brilho natural", "Sem oleosidade"],
+        name: "Shampoo Hydra Balance",
+        description: "Limpeza suave com hidratação equilibrada para cabelos secos e ressecados.",
+        category: "Hidratação",
+        line: "hydra-balance",
+        price: 7900,
+        image: "/products/shampoo-hydra.jpg",
+        benefits: ["Hidratação profunda", "Equilíbrio do pH", "Maciez", "Brilho natural"],
         featured: true,
       },
       {
         id: "4",
-        name: "Condicionador Reconstrutor",
-        description: "Fórmula avançada que sela as cutículas e proporciona desembaraço instantâneo com ação prolongada.",
-        category: "Tratamento",
-        price: 7900,
-        image: "/products/condicionador.jpg",
-        benefits: ["Desembaraço fácil", "Selagem de cutículas", "Proteção diária", "Maciez imediata"],
+        name: "Máscara Hydra Balance",
+        description: "Máscara de hidratação profunda com ácido hialurônico e aloe vera para cabelos ressecados.",
+        category: "Hidratação",
+        line: "hydra-balance",
+        price: 11900,
+        image: "/products/mascara-hydra.jpg",
+        benefits: ["Hidratação intensa", "Maciez prolongada", "Redução de frizz", "Brilho"],
         featured: false,
       },
       {
         id: "5",
-        name: "Óleo Capilar Restaurador",
-        description: "Blend de óleos vegetais nobres para restauração profunda e brilho incomparável.",
-        category: "Hidratação",
+        name: "Óleo Nutri Oil",
+        description: "Blend de óleos vegetais nobres para nutrição profunda e brilho incomparável.",
+        category: "Nutrição",
+        line: "nutri-oil",
         price: 9900,
         image: "/products/oleo.jpg",
-        benefits: ["Restauração profunda", "Brilho intenso", "Nutrição duradoura", "Proteção ambiental"],
-        featured: false,
+        benefits: ["Nutrição profunda", "Brilho intenso", "Sedosidade", "Proteção térmica"],
+        featured: true,
       },
       {
         id: "6",
-        name: "Leave-in Protetor",
-        description: "Proteção térmica e ambiental com ação anti-UV. Ideal para uso diário sem pesar.",
-        category: "Finalização",
+        name: "Leave-in Nutri Oil",
+        description: "Finalizador nutritivo com óleos de argan e macadâmia. Ideal para uso diário.",
+        category: "Nutrição",
+        line: "nutri-oil",
         price: 5900,
         image: "/products/leavein.jpg",
-        benefits: ["Proteção UV", "Leveza", "Hidratação leve", "Facilidade no pentear"],
+        benefits: ["Nutrição leve", "Brilho natural", "Anti-frizz", "Proteção UV"],
         featured: false,
       },
     ];
@@ -128,11 +135,18 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getProductsByLine(line: string): Promise<Product[]> {
+    return Array.from(this.products.values()).filter(
+      (product) => product.line.toLowerCase() === line.toLowerCase()
+    );
+  }
+
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
     const id = randomUUID();
     const product: Product = { 
       ...insertProduct, 
       id,
+      line: insertProduct.line || "fiber-force",
       featured: insertProduct.featured ?? null
     };
     this.products.set(id, product);

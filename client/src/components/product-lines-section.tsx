@@ -71,7 +71,7 @@ export function ProductLinesSection() {
                   {line.description}
                 </p>
                 
-                <Link href="/produtos">
+                <Link href={`/linha/${line.id}`}>
                   <Button 
                     variant="outline" 
                     className={`w-full group/btn ${line.borderColor} ${line.textColor} hover:${line.bgColor}`}

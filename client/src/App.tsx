@@ -8,6 +8,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import Home from "@/pages/home";
 import Products from "@/pages/products";
+import LineProducts from "@/pages/line-products";
 import About from "@/pages/about";
 import Contact from "@/pages/contact";
 import AdminLogin from "@/pages/admin-login";
@@ -21,6 +22,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/produtos" component={Products} />
+      <Route path="/linha/:line" component={LineProducts} />
       <Route path="/sobre" component={About} />
       <Route path="/contato" component={Contact} />
       <Route path="/admin" component={AdminLogin} />

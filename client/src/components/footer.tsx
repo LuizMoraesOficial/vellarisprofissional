@@ -22,8 +22,6 @@ export function Footer() {
 
   return (
     <footer className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-primary/10 dark:from-transparent dark:via-gold/5 dark:to-gold/10" />
-      
       <section className="relative bg-background dark:bg-gray-950 py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground dark:text-white mb-6 leading-tight">

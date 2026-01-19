@@ -36,7 +36,12 @@ import {
 } from "lucide-react";
 import type { Product } from "@shared/schema";
 
-const categories = ["Tratamento", "Hidratação", "Finalização"];
+const categories = ["Tratamento", "Hidratação", "Nutrição", "Finalização"];
+const lines = [
+  { id: "fiber-force", name: "Fiber Force" },
+  { id: "hydra-balance", name: "Hydra Balance" },
+  { id: "nutri-oil", name: "Nutri Oil" },
+];
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat("pt-BR", {
@@ -54,6 +59,7 @@ interface ProductFormData {
   name: string;
   description: string;
   category: string;
+  line: string;
   price: string;
   image: string;
   benefits: string;
@@ -64,6 +70,7 @@ const emptyFormData: ProductFormData = {
   name: "",
   description: "",
   category: "Tratamento",
+  line: "fiber-force",
   price: "",
   image: "/products/default.jpg",
   benefits: "",
@@ -110,6 +117,7 @@ export default function AdminDashboard() {
           name: data.name,
           description: data.description,
           category: data.category,
+          line: data.line,
           price: parsePriceInput(data.price),
           image: data.image,
           benefits: data.benefits.split("\n").filter(b => b.trim()),
@@ -141,6 +149,7 @@ export default function AdminDashboard() {
           name: data.name,
           description: data.description,
           category: data.category,
+          line: data.line,
           price: parsePriceInput(data.price),
           image: data.image,
           benefits: data.benefits.split("\n").filter(b => b.trim()),
@@ -191,6 +200,7 @@ export default function AdminDashboard() {
       name: product.name,
       description: product.description,
       category: product.category,
+      line: product.line || "fiber-force",
       price: (product.price / 100).toFixed(2).replace(".", ","),
       image: product.image,
       benefits: product.benefits?.join("\n") || "",
@@ -286,6 +296,25 @@ export default function AdminDashboard() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
+                    <Label htmlFor="line" className="text-gray-300">Linha</Label>
+                    <Select
+                      value={formData.line}
+                      onValueChange={(value) => setFormData({ ...formData, line: value })}
+                    >
+                      <SelectTrigger className="bg-gray-800 border-gray-700 text-white" data-testid="select-product-line">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-800 border-gray-700">
+                        {lines.map((line) => (
+                          <SelectItem key={line.id} value={line.id} className="text-white hover:bg-gray-700">
+                            {line.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
                     <Label htmlFor="category" className="text-gray-300">Categoria</Label>
                     <Select
                       value={formData.category}
@@ -303,19 +332,19 @@ export default function AdminDashboard() {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="price" className="text-gray-300">Preço (R$)</Label>
-                    <Input
-                      id="price"
-                      value={formData.price}
-                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                      placeholder="89,00"
-                      required
-                      className="bg-gray-800 border-gray-700 text-white focus:border-gold"
-                      data-testid="input-product-price"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="price" className="text-gray-300">Preço (R$)</Label>
+                  <Input
+                    id="price"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    placeholder="89,00"
+                    required
+                    className="bg-gray-800 border-gray-700 text-white focus:border-gold"
+                    data-testid="input-product-price"
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -412,9 +441,21 @@ export default function AdminDashboard() {
                           <Star className="w-4 h-4 text-gold fill-gold" />
                         )}
                       </div>
-                      <Badge variant="secondary" className="bg-gray-800 text-gray-300 text-xs">
-                        {product.category}
-                      </Badge>
+                      <div className="flex gap-1.5 flex-wrap">
+                        <Badge variant="secondary" className="bg-gray-800 text-gray-300 text-xs">
+                          {product.category}
+                        </Badge>
+                        <Badge 
+                          variant="outline" 
+                          className={`text-xs ${
+                            product.line === "fiber-force" ? "border-orange-500/50 text-orange-400" :
+                            product.line === "hydra-balance" ? "border-purple-500/50 text-purple-400" :
+                            "border-yellow-500/50 text-yellow-400"
+                          }`}
+                        >
+                          {lines.find(l => l.id === product.line)?.name || product.line}
+                        </Badge>
+                      </div>
                     </div>
                     <span className="text-lg font-bold text-gold">
                       {formatPrice(product.price)}

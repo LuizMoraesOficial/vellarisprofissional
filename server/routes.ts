@@ -44,7 +44,12 @@ export async function registerRoutes(
   
   app.get("/api/products", async (req, res) => {
     try {
-      const { category } = req.query;
+      const { category, line } = req.query;
+      
+      if (line && typeof line === "string") {
+        const products = await storage.getProductsByLine(line);
+        return res.json(products);
+      }
       
       if (category && typeof category === "string") {
         const products = await storage.getProductsByCategory(category);
