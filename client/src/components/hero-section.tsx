@@ -20,7 +20,7 @@ export function HeroSection() {
           <div className="flex items-center gap-2 mb-6">
             <Sparkles className="h-5 w-5 text-primary" />
             <span className="text-primary text-sm font-medium uppercase tracking-widest">
-              Professional Hair Care
+              Performance profissional para cabelos exigentes.
             </span>
           </div>
 
@@ -30,8 +30,7 @@ export function HeroSection() {
           </h1>
 
           <p className="text-lg sm:text-xl text-white/80 leading-relaxed mb-8 max-w-lg">
-            Descubra a linha profissional VELLARIS. Tecnologia avançada e ingredientes 
-            premium para resultados extraordinários em cada fio.
+            Tecnologia avançada, ativos selecionados e performance profissional para resultados de salão.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
