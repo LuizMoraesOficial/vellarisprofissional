@@ -36,13 +36,13 @@ export function HeroSection() {
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/produtos">
               <Button size="lg" className="group" data-testid="button-hero-produtos">
-                Conhecer Produtos
+                Conhecer as Linhas
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
             <Link href="/sobre">
               <Button size="lg" variant="outline" className="bg-white/10 backdrop-blur-sm border-white/20 text-white" data-testid="button-hero-sobre">
-                Nossa História
+                Nossa Tecnologia
               </Button>
             </Link>
           </div>
