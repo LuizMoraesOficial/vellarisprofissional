@@ -33,6 +33,13 @@ export const siteSettings = pgTable("site_settings", {
   youtube: text("youtube"),
   tiktok: text("tiktok"),
   address: text("address"),
+  logoUrl: text("logo_url"),
+  heroImage: text("hero_image"),
+  heroTitle: text("hero_title"),
+  heroSubtitle: text("hero_subtitle"),
+  fiberForceImage: text("fiber_force_image"),
+  hydraBalanceImage: text("hydra_balance_image"),
+  nutriOilImage: text("nutri_oil_image"),
 });
 
 export const insertProductSchema = createInsertSchema(products).omit({ id: true });

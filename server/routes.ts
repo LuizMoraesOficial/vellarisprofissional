@@ -244,6 +244,13 @@ export async function registerRoutes(
         youtube: settings.youtube,
         tiktok: settings.tiktok,
         address: settings.address,
+        logoUrl: settings.logoUrl,
+        heroImage: settings.heroImage,
+        heroTitle: settings.heroTitle,
+        heroSubtitle: settings.heroSubtitle,
+        fiberForceImage: settings.fiberForceImage,
+        hydraBalanceImage: settings.hydraBalanceImage,
+        nutriOilImage: settings.nutriOilImage,
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch settings" });

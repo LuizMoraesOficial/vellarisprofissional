@@ -1,9 +1,26 @@
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
-import heroImage from "@assets/stock_images/beautiful_woman_long_552a8cae.jpg";
+import heroImageDefault from "@assets/stock_images/beautiful_woman_long_552a8cae.jpg";
+
+interface PublicSettings {
+  heroImage?: string | null;
+  heroTitle?: string | null;
+  heroSubtitle?: string | null;
+}
 
 export function HeroSection() {
+  const { data: settings } = useQuery<PublicSettings>({
+    queryKey: ["/api/settings/public"],
+  });
+
+  const heroImage = settings?.heroImage || heroImageDefault;
+  const heroTitle = settings?.heroTitle || "Performance profissional para cabelos exigentes";
+  const heroSubtitle = settings?.heroSubtitle || "Tecnologia avançada, ativos selecionados e performance profissional para resultados de salão.";
+
+  const titleParts = heroTitle.split(" para ");
+
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
       <div className="absolute inset-0">
@@ -25,12 +42,18 @@ export function HeroSection() {
           </div>
 
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium text-white leading-tight mb-6">
-            Performance profissional para
-            <span className="block text-primary">cabelos exigentes</span>
+            {titleParts.length > 1 ? (
+              <>
+                {titleParts[0]} para
+                <span className="block text-primary">{titleParts[1]}</span>
+              </>
+            ) : (
+              heroTitle
+            )}
           </h1>
 
           <p className="text-lg sm:text-xl text-white/80 leading-relaxed mb-8 max-w-lg">
-            Tecnologia avançada, ativos selecionados e performance profissional para resultados de salão.
+            {heroSubtitle}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">

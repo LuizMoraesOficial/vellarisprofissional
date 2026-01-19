@@ -18,7 +18,10 @@ import {
   Instagram,
   Facebook,
   Youtube,
-  Loader2
+  Loader2,
+  Image,
+  Layout,
+  Sparkles
 } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
 import type { SiteSettings } from "@shared/schema";
@@ -37,6 +40,13 @@ export default function AdminSettings() {
     youtube: "",
     tiktok: "",
     address: "",
+    logoUrl: "",
+    heroImage: "",
+    heroTitle: "",
+    heroSubtitle: "",
+    fiberForceImage: "",
+    hydraBalanceImage: "",
+    nutriOilImage: "",
   });
 
   useEffect(() => {
@@ -73,6 +83,13 @@ export default function AdminSettings() {
         youtube: settings.youtube || "",
         tiktok: settings.tiktok || "",
         address: settings.address || "",
+        logoUrl: settings.logoUrl || "",
+        heroImage: settings.heroImage || "",
+        heroTitle: settings.heroTitle || "",
+        heroSubtitle: settings.heroSubtitle || "",
+        fiberForceImage: settings.fiberForceImage || "",
+        hydraBalanceImage: settings.hydraBalanceImage || "",
+        nutriOilImage: settings.nutriOilImage || "",
       });
     }
   }, [settings]);
@@ -86,6 +103,7 @@ export default function AdminSettings() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/settings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/settings/public"] });
       toast({
         title: "Sucesso!",
         description: "Configurações salvas com sucesso.",
@@ -126,7 +144,7 @@ export default function AdminSettings() {
             Configurações do Site
           </h1>
           <p className="text-gray-400">
-            Gerencie as informações de contato e redes sociais exibidas no site.
+            Gerencie as informações de contato, imagens e conteúdo exibido no site.
           </p>
         </div>
 
@@ -136,6 +154,170 @@ export default function AdminSettings() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
+            <Card className="bg-gray-900/50 border-gray-800 hover:border-gold/30 transition-all duration-300">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Layout className="w-5 h-5 text-gold" />
+                  Banner Principal (Hero)
+                </CardTitle>
+                <CardDescription>
+                  Imagem e textos do banner na página inicial.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="heroImage" className="text-gray-300 flex items-center gap-2">
+                    <Image className="w-4 h-4 text-gold" />
+                    URL da Imagem do Banner
+                  </Label>
+                  <Input
+                    id="heroImage"
+                    value={formData.heroImage}
+                    onChange={(e) => handleChange("heroImage", e.target.value)}
+                    className="bg-gray-800 border-gray-700 text-white focus:border-gold focus:ring-gold/20"
+                    placeholder="https://exemplo.com/imagem.jpg"
+                    data-testid="input-hero-image"
+                  />
+                  {formData.heroImage && (
+                    <div className="mt-2 rounded-lg overflow-hidden border border-gray-700 h-32">
+                      <img 
+                        src={formData.heroImage} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="heroTitle" className="text-gray-300">Título Principal</Label>
+                  <Input
+                    id="heroTitle"
+                    value={formData.heroTitle}
+                    onChange={(e) => handleChange("heroTitle", e.target.value)}
+                    className="bg-gray-800 border-gray-700 text-white focus:border-gold focus:ring-gold/20"
+                    placeholder="Performance profissional para cabelos exigentes"
+                    data-testid="input-hero-title"
+                  />
+                  <p className="text-xs text-gray-500">Use "para" no texto para destacar a segunda parte em dourado</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="heroSubtitle" className="text-gray-300">Subtítulo</Label>
+                  <Textarea
+                    id="heroSubtitle"
+                    value={formData.heroSubtitle}
+                    onChange={(e) => handleChange("heroSubtitle", e.target.value)}
+                    className="bg-gray-800 border-gray-700 text-white focus:border-gold focus:ring-gold/20 resize-none"
+                    placeholder="Tecnologia avançada..."
+                    rows={2}
+                    data-testid="input-hero-subtitle"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gray-900/50 border-gray-800 hover:border-gold/30 transition-all duration-300">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-gold" />
+                  Imagens das Linhas de Produtos
+                </CardTitle>
+                <CardDescription>
+                  Imagens exibidas nos cards das linhas na página inicial.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fiberForceImage" className="text-gray-300 flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-orange-500" />
+                      Fiber Force
+                    </Label>
+                    <Input
+                      id="fiberForceImage"
+                      value={formData.fiberForceImage}
+                      onChange={(e) => handleChange("fiberForceImage", e.target.value)}
+                      className="bg-gray-800 border-gray-700 text-white focus:border-gold focus:ring-gold/20"
+                      placeholder="https://exemplo.com/fiber-force.jpg"
+                      data-testid="input-fiber-force-image"
+                    />
+                    {formData.fiberForceImage && (
+                      <div className="mt-1 rounded-lg overflow-hidden border border-orange-500/30 h-20 w-32">
+                        <img src={formData.fiberForceImage} alt="Preview" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="hydraBalanceImage" className="text-gray-300 flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-purple-500" />
+                      Hydra Balance
+                    </Label>
+                    <Input
+                      id="hydraBalanceImage"
+                      value={formData.hydraBalanceImage}
+                      onChange={(e) => handleChange("hydraBalanceImage", e.target.value)}
+                      className="bg-gray-800 border-gray-700 text-white focus:border-gold focus:ring-gold/20"
+                      placeholder="https://exemplo.com/hydra-balance.jpg"
+                      data-testid="input-hydra-balance-image"
+                    />
+                    {formData.hydraBalanceImage && (
+                      <div className="mt-1 rounded-lg overflow-hidden border border-purple-500/30 h-20 w-32">
+                        <img src={formData.hydraBalanceImage} alt="Preview" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="nutriOilImage" className="text-gray-300 flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                      Nutri Oil
+                    </Label>
+                    <Input
+                      id="nutriOilImage"
+                      value={formData.nutriOilImage}
+                      onChange={(e) => handleChange("nutriOilImage", e.target.value)}
+                      className="bg-gray-800 border-gray-700 text-white focus:border-gold focus:ring-gold/20"
+                      placeholder="https://exemplo.com/nutri-oil.jpg"
+                      data-testid="input-nutri-oil-image"
+                    />
+                    {formData.nutriOilImage && (
+                      <div className="mt-1 rounded-lg overflow-hidden border border-yellow-500/30 h-20 w-32">
+                        <img src={formData.nutriOilImage} alt="Preview" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gray-900/50 border-gray-800 hover:border-gold/30 transition-all duration-300">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Image className="w-5 h-5 text-gold" />
+                  Logo do Site
+                </CardTitle>
+                <CardDescription>
+                  Logo exibido no cabeçalho do site.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="logoUrl" className="text-gray-300">URL da Logo</Label>
+                  <Input
+                    id="logoUrl"
+                    value={formData.logoUrl}
+                    onChange={(e) => handleChange("logoUrl", e.target.value)}
+                    className="bg-gray-800 border-gray-700 text-white focus:border-gold focus:ring-gold/20"
+                    placeholder="https://exemplo.com/logo.png (deixe em branco para usar texto)"
+                    data-testid="input-logo-url"
+                  />
+                  {formData.logoUrl && (
+                    <div className="mt-2 p-4 rounded-lg bg-gray-800 border border-gray-700 inline-block">
+                      <img src={formData.logoUrl} alt="Logo Preview" className="h-10 object-contain" />
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             <Card className="bg-gray-900/50 border-gray-800 hover:border-gold/30 transition-all duration-300">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">

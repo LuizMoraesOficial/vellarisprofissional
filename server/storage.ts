@@ -42,6 +42,13 @@ export class MemStorage implements IStorage {
       youtube: null,
       tiktok: null,
       address: "Av. Paulista, 1000 - São Paulo, SP",
+      logoUrl: null,
+      heroImage: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1200",
+      heroTitle: "Performance profissional para cabelos exigentes",
+      heroSubtitle: "Tecnologia avançada, ativos selecionados e performance profissional para resultados de salão.",
+      fiberForceImage: "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=600",
+      hydraBalanceImage: "https://images.unsplash.com/photo-1519735777090-ec97162dc266?w=600",
+      nutriOilImage: "https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=600",
     };
     this.seedProducts();
   }
