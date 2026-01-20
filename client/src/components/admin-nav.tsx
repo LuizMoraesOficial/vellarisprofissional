@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Package, Settings, MessageSquare, LogOut, LayoutDashboard } from "lucide-react";
+import { Package, Settings, MessageSquare, LogOut, LayoutDashboard, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface AdminNavProps {
@@ -8,6 +8,7 @@ interface AdminNavProps {
 
 const navItems = [
   { href: "/admin/dashboard", label: "Produtos", icon: Package },
+  { href: "/admin/linhas", label: "Linhas", icon: Layers },
   { href: "/admin/mensagens", label: "Mensagens", icon: MessageSquare },
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
