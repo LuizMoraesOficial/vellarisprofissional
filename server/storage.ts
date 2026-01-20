@@ -215,7 +215,7 @@ export class MemStorage implements IStorage {
     const product: Product = { 
       ...insertProduct, 
       id,
-      line: insertProduct.line || "fiber-force",
+      line: insertProduct.line,
       price: insertProduct.price ?? null,
       showPrice: insertProduct.showPrice ?? true,
       featured: insertProduct.featured ?? null

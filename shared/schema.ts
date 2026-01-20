@@ -20,7 +20,7 @@ export const products = pgTable("products", {
   name: text("name").notNull(),
   description: text("description").notNull(),
   category: text("category").notNull(),
-  line: text("line").notNull().default("fiber-force"),
+  line: text("line").notNull(),
   price: integer("price"),
   showPrice: boolean("show_price").default(true),
   image: text("image").notNull(),

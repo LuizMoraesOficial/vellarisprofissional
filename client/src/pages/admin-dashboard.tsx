@@ -34,14 +34,9 @@ import {
   Save,
   Star
 } from "lucide-react";
-import type { Product } from "@shared/schema";
+import type { Product, ProductLine } from "@shared/schema";
 
 const categories = ["Tratamento", "Hidratação", "Nutrição", "Finalização"];
-const lines = [
-  { id: "fiber-force", name: "Fiber Force" },
-  { id: "hydra-balance", name: "Hydra Balance" },
-  { id: "nutri-oil", name: "Nutri Oil" },
-];
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat("pt-BR", {
@@ -67,23 +62,23 @@ interface ProductFormData {
   featured: boolean;
 }
 
-const emptyFormData: ProductFormData = {
+const getEmptyFormData = (defaultLine?: string): ProductFormData => ({
   name: "",
   description: "",
   category: "Tratamento",
-  line: "fiber-force",
+  line: defaultLine || "",
   price: "",
   showPrice: true,
   image: "/products/default.jpg",
   benefits: "",
   featured: false,
-};
+});
 
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [formData, setFormData] = useState<ProductFormData>(emptyFormData);
+  const [formData, setFormData] = useState<ProductFormData>(getEmptyFormData());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const token = localStorage.getItem("adminToken");
 
@@ -95,6 +90,19 @@ export default function AdminDashboard() {
 
   const { data: products, isLoading } = useQuery<Product[]>({
     queryKey: ["/api/products"],
+  });
+
+  const { data: lines } = useQuery<ProductLine[]>({
+    queryKey: ["/api/admin/product-lines"],
+    queryFn: async () => {
+      const response = await fetch("/api/admin/product-lines", {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) return [];
+      return response.json();
+    },
   });
 
   const handleApiResponse = async (response: Response) => {
@@ -133,7 +141,7 @@ export default function AdminDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       toast({ title: "Produto criado com sucesso!" });
       setIsDialogOpen(false);
-      setFormData(emptyFormData);
+      setFormData(getEmptyFormData(lines?.[0]?.slug));
     },
     onError: () => {
       toast({ title: "Erro ao criar produto", variant: "destructive" });
@@ -167,7 +175,7 @@ export default function AdminDashboard() {
       toast({ title: "Produto atualizado com sucesso!" });
       setIsDialogOpen(false);
       setEditingProduct(null);
-      setFormData(emptyFormData);
+      setFormData(getEmptyFormData(lines?.[0]?.slug));
     },
     onError: () => {
       toast({ title: "Erro ao atualizar produto", variant: "destructive" });
@@ -216,7 +224,7 @@ export default function AdminDashboard() {
 
   const handleNewProduct = () => {
     setEditingProduct(null);
-    setFormData(emptyFormData);
+    setFormData(getEmptyFormData(lines?.[0]?.slug));
     setIsDialogOpen(true);
   };
 
@@ -307,14 +315,26 @@ export default function AdminDashboard() {
                       onValueChange={(value) => setFormData({ ...formData, line: value })}
                     >
                       <SelectTrigger className="bg-gray-800 border-gray-700 text-white" data-testid="select-product-line">
-                        <SelectValue />
+                        <SelectValue placeholder="Selecione uma linha" />
                       </SelectTrigger>
                       <SelectContent className="bg-gray-800 border-gray-700">
-                        {lines.map((line) => (
-                          <SelectItem key={line.id} value={line.id} className="text-white hover:bg-gray-700">
-                            {line.name}
+                        {lines && lines.length > 0 ? (
+                          lines.map((line) => (
+                            <SelectItem key={line.id} value={line.slug} className="text-white hover:bg-gray-700">
+                              <div className="flex items-center gap-2">
+                                <span 
+                                  className="w-2 h-2 rounded-full" 
+                                  style={{ backgroundColor: line.accentColor }}
+                                />
+                                {line.name}
+                              </div>
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-lines" disabled className="text-gray-400">
+                            Nenhuma linha cadastrada
                           </SelectItem>
-                        ))}
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -463,16 +483,21 @@ export default function AdminDashboard() {
                         <Badge variant="secondary" className="bg-gray-800 text-gray-300 text-xs">
                           {product.category}
                         </Badge>
-                        <Badge 
-                          variant="outline" 
-                          className={`text-xs ${
-                            product.line === "fiber-force" ? "border-orange-500/50 text-orange-400" :
-                            product.line === "hydra-balance" ? "border-purple-500/50 text-purple-400" :
-                            "border-yellow-500/50 text-yellow-400"
-                          }`}
-                        >
-                          {lines.find(l => l.id === product.line)?.name || product.line}
-                        </Badge>
+                        {(() => {
+                          const productLine = lines?.find(l => l.slug === product.line);
+                          return (
+                            <Badge 
+                              variant="outline" 
+                              className="text-xs"
+                              style={{
+                                borderColor: `${productLine?.accentColor || '#D4AF37'}80`,
+                                color: productLine?.accentColor || '#D4AF37'
+                              }}
+                            >
+                              {productLine?.name || product.line}
+                            </Badge>
+                          );
+                        })()}
                       </div>
                     </div>
                     {product.showPrice && product.price && (

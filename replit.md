@@ -44,17 +44,19 @@ The server handles:
 - **Database Ready**: Schema configured for PostgreSQL migration
 
 The schema includes:
-- `products` table: id, name, description, category, price, image, benefits array, featured flag
+- `productLines` table: id, slug (unique), name, description, longDescription, heroImage, featuredImage, accentColor, isActive, displayOrder
+- `products` table: id, name, description, category, line (references product line slug), price, showPrice, image, benefits array, featured flag
 - `contacts` table: id, name, email, phone, message, createdAt timestamp
-- `siteSettings` table: id, contactEmail, contactPhone, whatsapp, instagram, facebook, youtube, tiktok, address
+- `siteSettings` table: id, contactEmail, contactPhone, whatsapp, instagram, facebook, youtube, tiktok, address, logoUrl, heroImage, heroTitle, heroSubtitle
 
 ## Admin Panel
 
 The admin panel is accessible via hidden routes (no public links):
 - `/admin` - Login page (requires ADMIN_PASSWORD secret)
 - `/admin/dashboard` - Product management (CRUD)
+- `/admin/linhas` - Product line management (CRUD with images, colors, ordering)
 - `/admin/mensagens` - View and manage contact form submissions
-- `/admin/configuracoes` - Edit site settings (contact info, social media links)
+- `/admin/configuracoes` - Edit site settings (contact info, social media links, logo, hero images)
 
 Admin authentication uses bearer tokens stored in localStorage with 24-hour expiry. The admin navigation provides seamless movement between sections with a premium dark theme and golden accents.
 

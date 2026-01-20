@@ -31,6 +31,13 @@ import {
 } from "lucide-react";
 import type { ProductLine } from "@shared/schema";
 
+interface FormErrors {
+  slug?: string;
+  name?: string;
+  description?: string;
+  accentColor?: string;
+}
+
 interface LineFormData {
   slug: string;
   name: string;
@@ -60,8 +67,34 @@ export default function AdminLines() {
   const { toast } = useToast();
   const [editingLine, setEditingLine] = useState<ProductLine | null>(null);
   const [formData, setFormData] = useState<LineFormData>(emptyFormData);
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const token = localStorage.getItem("adminToken");
+
+  const validateForm = (): boolean => {
+    const errors: FormErrors = {};
+    
+    if (!formData.name.trim()) {
+      errors.name = "Nome é obrigatório";
+    }
+    
+    if (!formData.slug.trim()) {
+      errors.slug = "Slug é obrigatório";
+    } else if (!/^[a-z0-9-]+$/.test(formData.slug)) {
+      errors.slug = "Slug deve conter apenas letras minúsculas, números e hífens";
+    }
+    
+    if (!formData.description.trim()) {
+      errors.description = "Descrição é obrigatória";
+    }
+    
+    if (!formData.accentColor.trim() || !/^#[0-9A-Fa-f]{6}$/.test(formData.accentColor)) {
+      errors.accentColor = "Cor deve estar no formato hexadecimal (#RRGGBB)";
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   useEffect(() => {
     if (!token) {
@@ -191,6 +224,7 @@ export default function AdminLines() {
 
   const handleEdit = (line: ProductLine) => {
     setEditingLine(line);
+    setFormErrors({});
     setFormData({
       slug: line.slug,
       name: line.name,
@@ -207,6 +241,7 @@ export default function AdminLines() {
 
   const handleNewLine = () => {
     setEditingLine(null);
+    setFormErrors({});
     const nextOrder = lines ? Math.max(...lines.map(l => l.displayOrder || 0), 0) + 1 : 1;
     setFormData({ ...emptyFormData, displayOrder: nextOrder });
     setIsDialogOpen(true);
@@ -214,6 +249,12 @@ export default function AdminLines() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      toast({ title: "Por favor, corrija os erros no formulário", variant: "destructive" });
+      return;
+    }
+    
     if (editingLine) {
       updateMutation.mutate({ id: editingLine.id, data: formData });
     } else {
@@ -286,12 +327,14 @@ export default function AdminLines() {
                           name,
                           slug: editingLine ? formData.slug : generateSlug(name)
                         });
+                        if (formErrors.name) setFormErrors({ ...formErrors, name: undefined });
                       }}
                       placeholder="Ex: Fiber Force"
                       required
-                      className="bg-gray-800 border-gray-700 text-white focus:border-gold"
+                      className={`bg-gray-800 border-gray-700 text-white focus:border-gold ${formErrors.name ? 'border-red-500' : ''}`}
                       data-testid="input-line-name"
                     />
+                    {formErrors.name && <p className="text-xs text-red-400">{formErrors.name}</p>}
                   </div>
 
                   <div className="space-y-2">
@@ -299,13 +342,17 @@ export default function AdminLines() {
                     <Input
                       id="slug"
                       value={formData.slug}
-                      onChange={(e) => setFormData({ ...formData, slug: generateSlug(e.target.value) })}
+                      onChange={(e) => {
+                        setFormData({ ...formData, slug: generateSlug(e.target.value) });
+                        if (formErrors.slug) setFormErrors({ ...formErrors, slug: undefined });
+                      }}
                       placeholder="fiber-force"
                       required
-                      className="bg-gray-800 border-gray-700 text-white focus:border-gold"
+                      className={`bg-gray-800 border-gray-700 text-white focus:border-gold ${formErrors.slug ? 'border-red-500' : ''}`}
                       data-testid="input-line-slug"
                     />
-                    <p className="text-xs text-gray-500">Usado na URL: /linha/{formData.slug || "slug"}</p>
+                    {formErrors.slug && <p className="text-xs text-red-400">{formErrors.slug}</p>}
+                    {!formErrors.slug && <p className="text-xs text-gray-500">Usado na URL: /linha/{formData.slug || "slug"}</p>}
                   </div>
                 </div>
 
@@ -314,13 +361,17 @@ export default function AdminLines() {
                   <Textarea
                     id="description"
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, description: e.target.value });
+                      if (formErrors.description) setFormErrors({ ...formErrors, description: undefined });
+                    }}
                     placeholder="Descrição resumida da linha..."
                     rows={2}
                     required
-                    className="bg-gray-800 border-gray-700 text-white focus:border-gold resize-none"
+                    className={`bg-gray-800 border-gray-700 text-white focus:border-gold resize-none ${formErrors.description ? 'border-red-500' : ''}`}
                     data-testid="input-line-description"
                   />
+                  {formErrors.description && <p className="text-xs text-red-400">{formErrors.description}</p>}
                 </div>
 
                 <div className="space-y-2">
