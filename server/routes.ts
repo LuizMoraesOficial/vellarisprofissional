@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContactSchema, insertProductSchema, insertSettingsSchema } from "@shared/schema";
+import { insertContactSchema, insertProductSchema, insertSettingsSchema, insertProductLineSchema } from "@shared/schema";
 import { z } from "zod";
 import { randomBytes } from "crypto";
 
@@ -254,6 +254,117 @@ export async function registerRoutes(
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch settings" });
+    }
+  });
+
+  app.get("/api/product-lines", async (req, res) => {
+    try {
+      const lines = await storage.getAllProductLines();
+      const activeLines = lines.filter(line => line.isActive);
+      res.json(activeLines);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch product lines" });
+    }
+  });
+
+  app.get("/api/product-lines/:slug", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const line = await storage.getProductLineBySlug(slug);
+      
+      if (!line) {
+        return res.status(404).json({ error: "Product line not found" });
+      }
+      
+      res.json(line);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch product line" });
+    }
+  });
+
+  app.get("/api/admin/product-lines", verifyAdminToken, async (req, res) => {
+    try {
+      const lines = await storage.getAllProductLines();
+      res.json(lines);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch product lines" });
+    }
+  });
+
+  app.get("/api/admin/product-lines/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const line = await storage.getProductLineById(id);
+      
+      if (!line) {
+        return res.status(404).json({ error: "Product line not found" });
+      }
+      
+      res.json(line);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch product line" });
+    }
+  });
+
+  app.post("/api/admin/product-lines", verifyAdminToken, async (req, res) => {
+    try {
+      const validatedData = insertProductLineSchema.parse(req.body);
+      
+      const existing = await storage.getProductLineBySlug(validatedData.slug);
+      if (existing) {
+        return res.status(400).json({ error: "Uma linha com esse slug já existe" });
+      }
+      
+      const line = await storage.createProductLine(validatedData);
+      res.status(201).json(line);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create product line" });
+    }
+  });
+
+  app.put("/api/admin/product-lines/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateSchema = insertProductLineSchema.partial();
+      const validatedUpdates = updateSchema.parse(req.body);
+      
+      if (validatedUpdates.slug) {
+        const existing = await storage.getProductLineBySlug(validatedUpdates.slug);
+        if (existing && existing.id !== id) {
+          return res.status(400).json({ error: "Uma linha com esse slug já existe" });
+        }
+      }
+      
+      const line = await storage.updateProductLine(id, validatedUpdates);
+      
+      if (!line) {
+        return res.status(404).json({ error: "Product line not found" });
+      }
+      
+      res.json(line);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update product line" });
+    }
+  });
+
+  app.delete("/api/admin/product-lines/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteProductLine(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ error: "Product line not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete product line" });
     }
   });
 
