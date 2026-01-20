@@ -15,6 +15,7 @@ const featuredProducts: Partial<Product>[] = [
     description: "Limpeza profunda com tecnologia de reconstrução molecular para cabelos danificados.",
     category: "Tratamento",
     price: 8900,
+    showPrice: true,
     image: productImage1,
     benefits: ["Reconstrução molecular", "Limpeza profunda", "Hidratação intensa"],
   },
@@ -24,6 +25,7 @@ const featuredProducts: Partial<Product>[] = [
     description: "Tratamento intensivo com queratina hidrolisada e óleos essenciais.",
     category: "Hidratação",
     price: 12900,
+    showPrice: true,
     image: productImage2,
     benefits: ["Nutrição profunda", "Brilho intenso", "Maciez prolongada"],
   },
@@ -33,6 +35,7 @@ const featuredProducts: Partial<Product>[] = [
     description: "Proteção térmica e controle do frizz com tecnologia anti-quebra.",
     category: "Finalização",
     price: 7500,
+    showPrice: true,
     image: productImage3,
     benefits: ["Proteção térmica", "Anti-frizz", "Brilho natural"],
   },
@@ -71,9 +74,13 @@ function ProductCard({ product, index }: ProductCardProps) {
           {product.description}
         </p>
         <div className="flex items-center justify-between">
-          <span className="font-semibold text-lg">
-            {formatPrice(product.price || 0)}
-          </span>
+          {product.showPrice && product.price ? (
+            <span className="font-semibold text-lg">
+              {formatPrice(product.price)}
+            </span>
+          ) : (
+            <span className="text-muted-foreground text-sm">Consulte</span>
+          )}
           <Button variant="ghost" size="sm" className="group/btn" data-testid={`button-product-details-${product.id}`}>
             Detalhes
             <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
