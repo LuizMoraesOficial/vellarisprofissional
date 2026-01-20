@@ -133,9 +133,13 @@ export default function LineProducts() {
                       ))}
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className={`text-2xl font-bold ${info.color}`}>
-                        R$ {(product.price / 100).toFixed(2).replace(".", ",")}
-                      </span>
+                      {product.showPrice && product.price ? (
+                        <span className={`text-2xl font-bold ${info.color}`}>
+                          R$ {(product.price / 100).toFixed(2).replace(".", ",")}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">Consulte</span>
+                      )}
                       <Badge variant="secondary" className="text-xs">
                         {product.category}
                       </Badge>

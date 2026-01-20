@@ -61,6 +61,7 @@ interface ProductFormData {
   category: string;
   line: string;
   price: string;
+  showPrice: boolean;
   image: string;
   benefits: string;
   featured: boolean;
@@ -72,6 +73,7 @@ const emptyFormData: ProductFormData = {
   category: "Tratamento",
   line: "fiber-force",
   price: "",
+  showPrice: true,
   image: "/products/default.jpg",
   benefits: "",
   featured: false,
@@ -118,7 +120,8 @@ export default function AdminDashboard() {
           description: data.description,
           category: data.category,
           line: data.line,
-          price: parsePriceInput(data.price),
+          price: data.showPrice && data.price ? parsePriceInput(data.price) : null,
+          showPrice: data.showPrice,
           image: data.image,
           benefits: data.benefits.split("\n").filter(b => b.trim()),
           featured: data.featured,
@@ -150,7 +153,8 @@ export default function AdminDashboard() {
           description: data.description,
           category: data.category,
           line: data.line,
-          price: parsePriceInput(data.price),
+          price: data.showPrice && data.price ? parsePriceInput(data.price) : null,
+          showPrice: data.showPrice,
           image: data.image,
           benefits: data.benefits.split("\n").filter(b => b.trim()),
           featured: data.featured,
@@ -201,7 +205,8 @@ export default function AdminDashboard() {
       description: product.description,
       category: product.category,
       line: product.line || "fiber-force",
-      price: (product.price / 100).toFixed(2).replace(".", ","),
+      price: product.price ? (product.price / 100).toFixed(2).replace(".", ",") : "",
+      showPrice: product.showPrice ?? true,
       image: product.image,
       benefits: product.benefits?.join("\n") || "",
       featured: product.featured || false,
@@ -334,18 +339,31 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="price" className="text-gray-300">Preço (R$)</Label>
-                  <Input
-                    id="price"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    placeholder="89,00"
-                    required
-                    className="bg-gray-800 border-gray-700 text-white focus:border-gold"
-                    data-testid="input-product-price"
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-800/50 border border-gray-700">
+                  <Switch
+                    id="showPrice"
+                    checked={formData.showPrice}
+                    onCheckedChange={(checked) => setFormData({ ...formData, showPrice: checked })}
+                    data-testid="switch-product-show-price"
                   />
+                  <Label htmlFor="showPrice" className="text-gray-300 flex items-center gap-2">
+                    Exibir preço do produto
+                  </Label>
                 </div>
+
+                {formData.showPrice && (
+                  <div className="space-y-2">
+                    <Label htmlFor="price" className="text-gray-300">Preço (R$)</Label>
+                    <Input
+                      id="price"
+                      value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      placeholder="89,00"
+                      className="bg-gray-800 border-gray-700 text-white focus:border-gold"
+                      data-testid="input-product-price"
+                    />
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="image" className="text-gray-300">URL da Imagem</Label>
@@ -457,9 +475,11 @@ export default function AdminDashboard() {
                         </Badge>
                       </div>
                     </div>
-                    <span className="text-lg font-bold text-gold">
-                      {formatPrice(product.price)}
-                    </span>
+                    {product.showPrice && product.price && (
+                      <span className="text-lg font-bold text-gold">
+                        {formatPrice(product.price)}
+                      </span>
+                    )}
                   </div>
                   
                   <p className="text-sm text-gray-400 line-clamp-2 mb-4">

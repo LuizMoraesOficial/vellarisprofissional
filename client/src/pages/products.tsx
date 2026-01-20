@@ -93,9 +93,13 @@ function ProductCard({ product }: { product: Product }) {
         )}
         
         <div className="flex items-center justify-between pt-4 border-t border-border">
-          <span className="font-semibold text-lg">
-            {formatPrice(product.price)}
-          </span>
+          {product.showPrice && product.price ? (
+            <span className="font-semibold text-lg">
+              {formatPrice(product.price)}
+            </span>
+          ) : (
+            <span className="text-muted-foreground text-sm">Consulte</span>
+          )}
           <Button variant="ghost" size="sm" className="group/btn" data-testid={`button-product-details-${product.id}`}>
             Detalhes
             <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
