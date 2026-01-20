@@ -39,22 +39,12 @@ export function Header() {
         <div className="flex items-center justify-between h-16 md:h-20">
           <Link href="/" data-testid="link-logo">
             <div className="flex items-center gap-2 cursor-pointer">
-              {settings?.logoUrl ? (
-                <img 
-                  src={settings.logoUrl} 
-                  alt="VELLARIS" 
-                  className="h-8 md:h-10 w-auto object-contain"
-                />
-              ) : (
-                <>
-                  <span className="font-serif text-xl md:text-2xl font-semibold tracking-wide">
-                    VELLARIS
-                  </span>
-                  <span className="hidden sm:inline-block text-xs text-muted-foreground uppercase tracking-widest">
-                    Professional
-                  </span>
-                </>
-              )}
+              <span className="font-serif text-xl md:text-2xl font-semibold tracking-wide">
+                VELLARIS
+              </span>
+              <span className="hidden sm:inline-block text-xs text-muted-foreground uppercase tracking-widest">
+                Professional
+              </span>
             </div>
           </Link>
 
