@@ -2,6 +2,19 @@ import { pgTable, text, varchar, integer, boolean, timestamp } from "drizzle-orm
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+export const productLines = pgTable("product_lines", {
+  id: varchar("id", { length: 50 }).primaryKey(),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  longDescription: text("long_description"),
+  heroImage: text("hero_image"),
+  featuredImage: text("featured_image"),
+  accentColor: text("accent_color").notNull().default("#D4AF37"),
+  isActive: boolean("is_active").default(true),
+  displayOrder: integer("display_order").default(0),
+});
+
 export const products = pgTable("products", {
   id: varchar("id", { length: 50 }).primaryKey(),
   name: text("name").notNull(),
@@ -43,10 +56,13 @@ export const siteSettings = pgTable("site_settings", {
   nutriOilImage: text("nutri_oil_image"),
 });
 
+export const insertProductLineSchema = createInsertSchema(productLines).omit({ id: true });
 export const insertProductSchema = createInsertSchema(products).omit({ id: true });
 export const insertContactSchema = createInsertSchema(contacts).omit({ id: true, createdAt: true });
 export const insertSettingsSchema = createInsertSchema(siteSettings).omit({ id: true });
 
+export type InsertProductLine = z.infer<typeof insertProductLineSchema>;
+export type ProductLine = typeof productLines.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Product = typeof products.$inferSelect;
 export type InsertContact = z.infer<typeof insertContactSchema>;

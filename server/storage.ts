@@ -4,7 +4,9 @@ import {
   type Contact, 
   type InsertContact,
   type SiteSettings,
-  type InsertSettings
+  type InsertSettings,
+  type ProductLine,
+  type InsertProductLine
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -22,16 +24,24 @@ export interface IStorage {
   deleteContact(id: string): Promise<boolean>;
   getSettings(): Promise<SiteSettings>;
   updateSettings(settings: Partial<InsertSettings>): Promise<SiteSettings>;
+  getAllProductLines(): Promise<ProductLine[]>;
+  getProductLineBySlug(slug: string): Promise<ProductLine | undefined>;
+  getProductLineById(id: string): Promise<ProductLine | undefined>;
+  createProductLine(line: InsertProductLine): Promise<ProductLine>;
+  updateProductLine(id: string, updates: Partial<InsertProductLine>): Promise<ProductLine | undefined>;
+  deleteProductLine(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
   private products: Map<string, Product>;
   private contacts: Map<string, Contact>;
+  private productLines: Map<string, ProductLine>;
   private settings: SiteSettings;
 
   constructor() {
     this.products = new Map();
     this.contacts = new Map();
+    this.productLines = new Map();
     this.settings = {
       id: "main",
       contactEmail: "contato@vellaris.com.br",
@@ -50,7 +60,53 @@ export class MemStorage implements IStorage {
       hydraBalanceImage: "https://images.unsplash.com/photo-1519735777090-ec97162dc266?w=600",
       nutriOilImage: "https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=600",
     };
+    this.seedProductLines();
     this.seedProducts();
+  }
+
+  private seedProductLines() {
+    const lines: ProductLine[] = [
+      {
+        id: "1",
+        slug: "fiber-force",
+        name: "Fiber Force",
+        description: "Linha de reconstrução profissional para cabelos danificados e quebradiços",
+        longDescription: "Tecnologia avançada de reconstrução que penetra na fibra capilar, restaurando a força e elasticidade dos fios. Ideal para cabelos que passaram por processos químicos intensos.",
+        heroImage: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1200",
+        featuredImage: "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=600",
+        accentColor: "#f97316",
+        isActive: true,
+        displayOrder: 1,
+      },
+      {
+        id: "2",
+        slug: "hydra-balance",
+        name: "Hydra Balance",
+        description: "Linha de hidratação profunda para cabelos secos e ressecados",
+        longDescription: "Fórmula exclusiva com ácido hialurônico e pantenol que proporciona hidratação profunda e duradoura, devolvendo a maciez e o brilho natural dos fios.",
+        heroImage: "https://images.unsplash.com/photo-1519735777090-ec97162dc266?w=1200",
+        featuredImage: "https://images.unsplash.com/photo-1519735777090-ec97162dc266?w=600",
+        accentColor: "#a855f7",
+        isActive: true,
+        displayOrder: 2,
+      },
+      {
+        id: "3",
+        slug: "nutri-oil",
+        name: "Nutri Oil",
+        description: "Linha de nutrição e brilho para cabelos opacos e sem vida",
+        longDescription: "Blend exclusivo de óleos essenciais como argan, macadâmia e pracaxi que nutre profundamente os fios, proporcionando brilho extraordinário e proteção contra danos externos.",
+        heroImage: "https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=1200",
+        featuredImage: "https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=600",
+        accentColor: "#ca8a04",
+        isActive: true,
+        displayOrder: 3,
+      },
+    ];
+
+    lines.forEach((line) => {
+      this.productLines.set(line.id, line);
+    });
   }
 
   private seedProducts() {
@@ -225,6 +281,54 @@ export class MemStorage implements IStorage {
       ...updates,
     };
     return this.settings;
+  }
+
+  async getAllProductLines(): Promise<ProductLine[]> {
+    const lines = Array.from(this.productLines.values());
+    return lines.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+  }
+
+  async getProductLineBySlug(slug: string): Promise<ProductLine | undefined> {
+    return Array.from(this.productLines.values()).find(
+      (line) => line.slug.toLowerCase() === slug.toLowerCase()
+    );
+  }
+
+  async getProductLineById(id: string): Promise<ProductLine | undefined> {
+    return this.productLines.get(id);
+  }
+
+  async createProductLine(insertLine: InsertProductLine): Promise<ProductLine> {
+    const id = randomUUID();
+    const line: ProductLine = {
+      ...insertLine,
+      id,
+      longDescription: insertLine.longDescription ?? null,
+      heroImage: insertLine.heroImage ?? null,
+      featuredImage: insertLine.featuredImage ?? null,
+      accentColor: insertLine.accentColor || "#D4AF37",
+      isActive: insertLine.isActive ?? true,
+      displayOrder: insertLine.displayOrder ?? 0,
+    };
+    this.productLines.set(id, line);
+    return line;
+  }
+
+  async updateProductLine(id: string, updates: Partial<InsertProductLine>): Promise<ProductLine | undefined> {
+    const existing = this.productLines.get(id);
+    if (!existing) return undefined;
+
+    const updated: ProductLine = {
+      ...existing,
+      ...updates,
+      id,
+    };
+    this.productLines.set(id, updated);
+    return updated;
+  }
+
+  async deleteProductLine(id: string): Promise<boolean> {
+    return this.productLines.delete(id);
   }
 }
 
