@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./theme-toggle";
@@ -11,9 +12,26 @@ const navLinks = [
   { href: "/contato", label: "Contato" },
 ];
 
+interface PublicSettings {
+  logoUrl?: string | null;
+}
+
 export function Header() {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const { data: settings } = useQuery<PublicSettings>({
+    queryKey: ["/api/settings/public"],
+  });
+
+  useEffect(() => {
+    if (settings?.logoUrl) {
+      const link = document.querySelector("link[rel='icon']") as HTMLLinkElement;
+      if (link) {
+        link.href = settings.logoUrl;
+      }
+    }
+  }, [settings?.logoUrl]);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -21,12 +39,22 @@ export function Header() {
         <div className="flex items-center justify-between h-16 md:h-20">
           <Link href="/" data-testid="link-logo">
             <div className="flex items-center gap-2 cursor-pointer">
-              <span className="font-serif text-xl md:text-2xl font-semibold tracking-wide">
-                VELLARIS
-              </span>
-              <span className="hidden sm:inline-block text-xs text-muted-foreground uppercase tracking-widest">
-                Professional
-              </span>
+              {settings?.logoUrl ? (
+                <img 
+                  src={settings.logoUrl} 
+                  alt="VELLARIS" 
+                  className="h-8 md:h-10 w-auto object-contain"
+                />
+              ) : (
+                <>
+                  <span className="font-serif text-xl md:text-2xl font-semibold tracking-wide">
+                    VELLARIS
+                  </span>
+                  <span className="hidden sm:inline-block text-xs text-muted-foreground uppercase tracking-widest">
+                    Professional
+                  </span>
+                </>
+              )}
             </div>
           </Link>
 
