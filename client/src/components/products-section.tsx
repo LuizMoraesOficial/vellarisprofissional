@@ -1,6 +1,8 @@
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowRight } from "lucide-react";
 import type { Product } from "@shared/schema";
 
@@ -8,38 +10,7 @@ import productImage1 from "@assets/stock_images/luxury_professional__1ebcb013.jp
 import productImage2 from "@assets/stock_images/luxury_professional__a49a6ff1.jpg";
 import productImage3 from "@assets/stock_images/luxury_professional__d85d0739.jpg";
 
-const featuredProducts: Partial<Product>[] = [
-  {
-    id: "1",
-    name: "Shampoo Reparador",
-    description: "Limpeza profunda com tecnologia de reconstrução molecular para cabelos danificados.",
-    category: "Tratamento",
-    price: 8900,
-    showPrice: true,
-    image: productImage1,
-    benefits: ["Reconstrução molecular", "Limpeza profunda", "Hidratação intensa"],
-  },
-  {
-    id: "2",
-    name: "Máscara Nutritiva",
-    description: "Tratamento intensivo com queratina hidrolisada e óleos essenciais.",
-    category: "Hidratação",
-    price: 12900,
-    showPrice: true,
-    image: productImage2,
-    benefits: ["Nutrição profunda", "Brilho intenso", "Maciez prolongada"],
-  },
-  {
-    id: "3",
-    name: "Sérum Finalizador",
-    description: "Proteção térmica e controle do frizz com tecnologia anti-quebra.",
-    category: "Finalização",
-    price: 7500,
-    showPrice: true,
-    image: productImage3,
-    benefits: ["Proteção térmica", "Anti-frizz", "Brilho natural"],
-  },
-];
+const defaultImages = [productImage1, productImage2, productImage3];
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat("pt-BR", {
@@ -49,16 +20,20 @@ function formatPrice(price: number): string {
 }
 
 interface ProductCardProps {
-  product: Partial<Product>;
+  product: Product;
   index: number;
 }
 
 function ProductCard({ product, index }: ProductCardProps) {
+  const imageUrl = product.image?.startsWith("http") || product.image?.startsWith("/") 
+    ? product.image 
+    : defaultImages[index % defaultImages.length];
+
   return (
     <Card className="group overflow-visible border-0 bg-card hover-elevate" data-testid={`card-product-${product.id}`}>
       <div className="aspect-square overflow-hidden bg-muted rounded-t-md">
         <img
-          src={product.image}
+          src={imageUrl}
           alt={product.name}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
@@ -91,7 +66,31 @@ function ProductCard({ product, index }: ProductCardProps) {
   );
 }
 
+function ProductCardSkeleton() {
+  return (
+    <Card className="overflow-hidden border-0 bg-card">
+      <Skeleton className="aspect-square" />
+      <div className="p-6 space-y-3">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-6 w-3/4" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-2/3" />
+        <div className="flex justify-between items-center pt-4">
+          <Skeleton className="h-6 w-24" />
+          <Skeleton className="h-9 w-24" />
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 export function ProductsSection() {
+  const { data: products, isLoading } = useQuery<Product[]>({
+    queryKey: ["/api/products"],
+  });
+
+  const featuredProducts = products?.filter(p => p.featured)?.slice(0, 3) || [];
+
   return (
     <section className="py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -109,9 +108,21 @@ export function ProductsSection() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuredProducts.map((product, index) => (
-            <ProductCard key={product.id} product={product} index={index} />
-          ))}
+          {isLoading ? (
+            <>
+              <ProductCardSkeleton />
+              <ProductCardSkeleton />
+              <ProductCardSkeleton />
+            </>
+          ) : featuredProducts.length > 0 ? (
+            featuredProducts.map((product, index) => (
+              <ProductCard key={product.id} product={product} index={index} />
+            ))
+          ) : (
+            products?.slice(0, 3).map((product, index) => (
+              <ProductCard key={product.id} product={product} index={index} />
+            ))
+          )}
         </div>
 
         <div className="text-center mt-12">
