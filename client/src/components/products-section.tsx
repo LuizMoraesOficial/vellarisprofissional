@@ -25,9 +25,8 @@ interface ProductCardProps {
 }
 
 function ProductCard({ product, index }: ProductCardProps) {
-  const imageUrl = product.image?.startsWith("http") || product.image?.startsWith("/") 
-    ? product.image 
-    : defaultImages[index % defaultImages.length];
+  const isValidUrl = product.image?.startsWith("http");
+  const imageUrl = isValidUrl ? product.image : defaultImages[index % defaultImages.length];
 
   return (
     <Card className="group overflow-visible border-0 bg-card hover-elevate" data-testid={`card-product-${product.id}`}>
