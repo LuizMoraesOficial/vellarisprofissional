@@ -10,6 +10,7 @@ import {
   testimonials,
   customSections,
   customSectionItems,
+  customSectionProducts,
   type Product,
   type InsertProduct,
   type Contact,
@@ -26,6 +27,8 @@ import {
   type InsertCustomSection,
   type CustomSectionItem,
   type InsertCustomSectionItem,
+  type CustomSectionProduct,
+  type InsertCustomSectionProduct,
 } from "@shared/schema";
 import type { IStorage } from "./storage";
 
@@ -464,5 +467,42 @@ export class DatabaseStorage implements IStorage {
   async deleteCustomSectionItem(id: string): Promise<boolean> {
     const result = await db.delete(customSectionItems).where(eq(customSectionItems.id, id)).returning();
     return result.length > 0;
+  }
+
+  async getProductsBySectionId(sectionId: string): Promise<CustomSectionProduct[]> {
+    return await db.select().from(customSectionProducts).where(eq(customSectionProducts.sectionId, sectionId));
+  }
+
+  async addProductToSection(sectionId: string, productId: string, displayOrder: number = 0): Promise<CustomSectionProduct> {
+    const [created] = await db.insert(customSectionProducts).values({ 
+      id: randomUUID(),
+      sectionId, 
+      productId,
+      displayOrder
+    }).returning();
+    return created;
+  }
+
+  async removeProductFromSection(sectionId: string, productId: string): Promise<boolean> {
+    const result = await db.delete(customSectionProducts)
+      .where(eq(customSectionProducts.sectionId, sectionId))
+      .returning();
+    return result.length > 0;
+  }
+
+  async setProductsForSection(sectionId: string, productIds: string[]): Promise<CustomSectionProduct[]> {
+    await db.delete(customSectionProducts).where(eq(customSectionProducts.sectionId, sectionId));
+    
+    if (productIds.length === 0) return [];
+    
+    const productsToInsert = productIds.map((productId, index) => ({
+      id: randomUUID(),
+      sectionId,
+      productId,
+      displayOrder: index
+    }));
+    
+    const created = await db.insert(customSectionProducts).values(productsToInsert).returning();
+    return created;
   }
 }

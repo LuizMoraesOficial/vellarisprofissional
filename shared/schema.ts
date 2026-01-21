@@ -28,6 +28,13 @@ export const customSectionItems = pgTable("custom_section_items", {
   isActive: boolean("is_active").default(true),
 });
 
+export const customSectionProducts = pgTable("custom_section_products", {
+  id: varchar("id", { length: 50 }).primaryKey(),
+  sectionId: varchar("section_id", { length: 50 }).notNull(),
+  productId: varchar("product_id", { length: 50 }).notNull(),
+  displayOrder: integer("display_order").default(0),
+});
+
 export const features = pgTable("features", {
   id: varchar("id", { length: 50 }).primaryKey(),
   icon: text("icon").notNull().default("sparkles"),
@@ -120,6 +127,7 @@ export const siteSettings = pgTable("site_settings", {
 
 export const insertCustomSectionSchema = createInsertSchema(customSections).omit({ id: true });
 export const insertCustomSectionItemSchema = createInsertSchema(customSectionItems).omit({ id: true });
+export const insertCustomSectionProductSchema = createInsertSchema(customSectionProducts).omit({ id: true });
 export const insertFeatureSchema = createInsertSchema(features).omit({ id: true });
 export const insertTestimonialSchema = createInsertSchema(testimonials).omit({ id: true });
 export const insertProductLineSchema = createInsertSchema(productLines).omit({ id: true });
@@ -131,6 +139,8 @@ export type InsertCustomSection = z.infer<typeof insertCustomSectionSchema>;
 export type CustomSection = typeof customSections.$inferSelect;
 export type InsertCustomSectionItem = z.infer<typeof insertCustomSectionItemSchema>;
 export type CustomSectionItem = typeof customSectionItems.$inferSelect;
+export type InsertCustomSectionProduct = z.infer<typeof insertCustomSectionProductSchema>;
+export type CustomSectionProduct = typeof customSectionProducts.$inferSelect;
 export type InsertFeature = z.infer<typeof insertFeatureSchema>;
 export type Feature = typeof features.$inferSelect;
 export type InsertTestimonial = z.infer<typeof insertTestimonialSchema>;
