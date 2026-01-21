@@ -558,9 +558,19 @@ export async function registerRoutes(
       const activeSections = sections.filter(s => s.isActive);
       const sectionsWithItems = await Promise.all(
         activeSections.map(async (section) => {
-          const items = await storage.getItemsBySectionId(section.id);
-          const activeItems = items.filter(i => i.isActive);
-          return { ...section, items: activeItems };
+          if (section.type === "products") {
+            const sectionProducts = await storage.getProductsBySectionId(section.id);
+            const allProducts = await storage.getAllProducts();
+            const orderedProducts = sectionProducts
+              .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+              .map(sp => allProducts.find(p => p.id === sp.productId))
+              .filter(Boolean);
+            return { ...section, items: [], products: orderedProducts };
+          } else {
+            const items = await storage.getItemsBySectionId(section.id);
+            const activeItems = items.filter(i => i.isActive);
+            return { ...section, items: activeItems, products: [] };
+          }
         })
       );
       res.json(sectionsWithItems);
@@ -715,6 +725,33 @@ export async function registerRoutes(
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete section item" });
+    }
+  });
+
+  // Custom Section Products Routes
+  app.get("/api/admin/custom-sections/:sectionId/products", verifyAdminToken, async (req, res) => {
+    try {
+      const { sectionId } = req.params;
+      const sectionProducts = await storage.getProductsBySectionId(sectionId);
+      res.json(sectionProducts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch section products" });
+    }
+  });
+
+  app.put("/api/admin/custom-sections/:sectionId/products", verifyAdminToken, async (req, res) => {
+    try {
+      const { sectionId } = req.params;
+      const { productIds } = req.body;
+      
+      if (!Array.isArray(productIds)) {
+        return res.status(400).json({ error: "productIds must be an array" });
+      }
+      
+      const sectionProducts = await storage.setProductsForSection(sectionId, productIds);
+      res.json(sectionProducts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update section products" });
     }
   });
 
