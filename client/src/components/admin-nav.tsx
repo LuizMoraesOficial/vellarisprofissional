@@ -40,7 +40,7 @@ export function AdminNav({ onLogout }: AdminNavProps) {
               </div>
             </Link>
 
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-1 flex-wrap">
               {navItems.map((item) => {
                 const isActive = location === item.href;
                 const Icon = item.icon;
@@ -48,9 +48,10 @@ export function AdminNav({ onLogout }: AdminNavProps) {
                   <Link key={item.href} href={item.href}>
                     <Button
                       variant={isActive ? "default" : "ghost"}
-                      className={`gap-2 transition-all duration-300 ${
+                      size="sm"
+                      className={`gap-1.5 transition-all duration-300 ${
                         isActive 
-                          ? "bg-gold text-black hover:bg-gold/90" 
+                          ? "bg-gold text-black" 
                           : "text-gray-300 hover:text-white hover:bg-white/10"
                       }`}
                       data-testid={`admin-nav-${item.label.toLowerCase()}`}
@@ -83,7 +84,7 @@ export function AdminNav({ onLogout }: AdminNavProps) {
           </div>
         </div>
 
-        <div className="md:hidden pb-3 flex gap-1 overflow-x-auto">
+        <div className="lg:hidden pb-3 flex gap-1 overflow-x-auto scrollbar-hide">
           {navItems.map((item) => {
             const isActive = location === item.href;
             const Icon = item.icon;
@@ -92,7 +93,7 @@ export function AdminNav({ onLogout }: AdminNavProps) {
                 <Button
                   variant={isActive ? "default" : "ghost"}
                   size="sm"
-                  className={`gap-2 whitespace-nowrap ${
+                  className={`gap-1.5 whitespace-nowrap flex-shrink-0 ${
                     isActive 
                       ? "bg-gold text-black" 
                       : "text-gray-300"

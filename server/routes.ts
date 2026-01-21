@@ -260,6 +260,7 @@ export async function registerRoutes(
         testimonialsSectionImage: settings.testimonialsSectionImage,
         ctaSectionTitle: settings.ctaSectionTitle,
         ctaSectionSubtitle: settings.ctaSectionSubtitle,
+        featuredProductsSectionEnabled: settings.featuredProductsSectionEnabled,
         contactPageTitle: settings.contactPageTitle,
         contactPageSubtitle: settings.contactPageSubtitle,
         contactPageLabel: settings.contactPageLabel,
