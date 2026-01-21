@@ -6,7 +6,11 @@ import {
   type SiteSettings,
   type InsertSettings,
   type ProductLine,
-  type InsertProductLine
+  type InsertProductLine,
+  type Feature,
+  type InsertFeature,
+  type Testimonial,
+  type InsertTestimonial
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -30,18 +34,32 @@ export interface IStorage {
   createProductLine(line: InsertProductLine): Promise<ProductLine>;
   updateProductLine(id: string, updates: Partial<InsertProductLine>): Promise<ProductLine | undefined>;
   deleteProductLine(id: string): Promise<boolean>;
+  getAllFeatures(): Promise<Feature[]>;
+  getFeatureById(id: string): Promise<Feature | undefined>;
+  createFeature(feature: InsertFeature): Promise<Feature>;
+  updateFeature(id: string, updates: Partial<InsertFeature>): Promise<Feature | undefined>;
+  deleteFeature(id: string): Promise<boolean>;
+  getAllTestimonials(): Promise<Testimonial[]>;
+  getTestimonialById(id: string): Promise<Testimonial | undefined>;
+  createTestimonial(testimonial: InsertTestimonial): Promise<Testimonial>;
+  updateTestimonial(id: string, updates: Partial<InsertTestimonial>): Promise<Testimonial | undefined>;
+  deleteTestimonial(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
   private products: Map<string, Product>;
   private contacts: Map<string, Contact>;
   private productLines: Map<string, ProductLine>;
+  private features: Map<string, Feature>;
+  private testimonials: Map<string, Testimonial>;
   private settings: SiteSettings;
 
   constructor() {
     this.products = new Map();
     this.contacts = new Map();
     this.productLines = new Map();
+    this.features = new Map();
+    this.testimonials = new Map();
     this.settings = {
       id: "main",
       contactEmail: "contato@vellaris.com.br",
@@ -59,9 +77,27 @@ export class MemStorage implements IStorage {
       fiberForceImage: "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=600",
       hydraBalanceImage: "https://images.unsplash.com/photo-1519735777090-ec97162dc266?w=600",
       nutriOilImage: "https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=600",
+      benefitsSectionTitle: "Excelência em cada fórmula",
+      benefitsSectionSubtitle: "Cada produto VELLARIS é resultado de anos de pesquisa e desenvolvimento, combinando ciência e natureza.",
+      benefitsSectionLabel: "Por que VELLARIS",
+      testimonialsSectionTitle: "O que dizem sobre nós",
+      testimonialsSectionSubtitle: "Profissionais e clientes compartilham suas experiências com os produtos VELLARIS.",
+      testimonialsSectionLabel: "Depoimentos",
+      testimonialsSectionImage: null,
+      ctaSectionTitle: "Pronto para transformar seus cabelos?",
+      ctaSectionSubtitle: "Entre em contato conosco e descubra como os produtos VELLARIS podem elevar os resultados do seu salão ou cuidados pessoais.",
+      contactPageTitle: "Entre em Contato",
+      contactPageSubtitle: "Estamos aqui para ajudar. Envie sua mensagem e nossa equipe entrará em contato o mais breve possível.",
+      contactPageLabel: "Fale Conosco",
+      contactPageProfessionalTitle: "Para Profissionais",
+      contactPageProfessionalText: "Se você é proprietário de salão ou profissional da beleza, temos condições especiais para você. Entre em contato para conhecer nossa linha profissional e condições de parceria.",
+      contactPageProfessionalEmail: "profissionais@vellaris.com.br",
+      footerDescription: "Linha profissional de cuidados capilares para resultados extraordinários. Tecnologia avançada para cabelos saudáveis e brilhantes.",
     };
     this.seedProductLines();
     this.seedProducts();
+    this.seedFeatures();
+    this.seedTestimonials();
   }
 
   private seedProductLines() {
@@ -329,6 +365,155 @@ export class MemStorage implements IStorage {
 
   async deleteProductLine(id: string): Promise<boolean> {
     return this.productLines.delete(id);
+  }
+
+  private seedFeatures() {
+    const featuresData: Feature[] = [
+      {
+        id: "1",
+        icon: "sparkles",
+        title: "Tecnologia Avançada",
+        description: "Fórmulas desenvolvidas com nanotecnologia para máxima absorção e resultados visíveis.",
+        displayOrder: 1,
+        isActive: true,
+      },
+      {
+        id: "2",
+        icon: "leaf",
+        title: "Ingredientes Naturais",
+        description: "Extratos botânicos premium e óleos essenciais cuidadosamente selecionados.",
+        displayOrder: 2,
+        isActive: true,
+      },
+      {
+        id: "3",
+        icon: "shield",
+        title: "Proteção Completa",
+        description: "Proteção térmica e ambiental para manter seus cabelos saudáveis.",
+        displayOrder: 3,
+        isActive: true,
+      },
+      {
+        id: "4",
+        icon: "droplets",
+        title: "Hidratação Profunda",
+        description: "Complexo hidratante que penetra na fibra capilar para resultados duradouros.",
+        displayOrder: 4,
+        isActive: true,
+      },
+    ];
+    featuresData.forEach((f) => this.features.set(f.id, f));
+  }
+
+  private seedTestimonials() {
+    const testimonialsData: Testimonial[] = [
+      {
+        id: "1",
+        name: "Maria Silva",
+        role: "Cabeleireira Profissional",
+        content: "Os produtos VELLARIS transformaram completamente o trabalho no meu salão. Os clientes adoram os resultados!",
+        rating: 5,
+        displayOrder: 1,
+        isActive: true,
+      },
+      {
+        id: "2",
+        name: "Ana Santos",
+        role: "Cliente",
+        content: "Nunca tive um cabelo tão saudável e brilhante. A diferença é visível desde a primeira aplicação.",
+        rating: 5,
+        displayOrder: 2,
+        isActive: true,
+      },
+      {
+        id: "3",
+        name: "Carla Oliveira",
+        role: "Influenciadora de Beleza",
+        content: "Qualidade profissional real. Recomendo para quem busca resultados extraordinários.",
+        rating: 5,
+        displayOrder: 3,
+        isActive: true,
+      },
+    ];
+    testimonialsData.forEach((t) => this.testimonials.set(t.id, t));
+  }
+
+  async getAllFeatures(): Promise<Feature[]> {
+    const features = Array.from(this.features.values());
+    return features.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+  }
+
+  async getFeatureById(id: string): Promise<Feature | undefined> {
+    return this.features.get(id);
+  }
+
+  async createFeature(insertFeature: InsertFeature): Promise<Feature> {
+    const id = randomUUID();
+    const feature: Feature = {
+      ...insertFeature,
+      id,
+      icon: insertFeature.icon || "sparkles",
+      displayOrder: insertFeature.displayOrder ?? 0,
+      isActive: insertFeature.isActive ?? true,
+    };
+    this.features.set(id, feature);
+    return feature;
+  }
+
+  async updateFeature(id: string, updates: Partial<InsertFeature>): Promise<Feature | undefined> {
+    const existing = this.features.get(id);
+    if (!existing) return undefined;
+
+    const updated: Feature = {
+      ...existing,
+      ...updates,
+      id,
+    };
+    this.features.set(id, updated);
+    return updated;
+  }
+
+  async deleteFeature(id: string): Promise<boolean> {
+    return this.features.delete(id);
+  }
+
+  async getAllTestimonials(): Promise<Testimonial[]> {
+    const testimonials = Array.from(this.testimonials.values());
+    return testimonials.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+  }
+
+  async getTestimonialById(id: string): Promise<Testimonial | undefined> {
+    return this.testimonials.get(id);
+  }
+
+  async createTestimonial(insertTestimonial: InsertTestimonial): Promise<Testimonial> {
+    const id = randomUUID();
+    const testimonial: Testimonial = {
+      ...insertTestimonial,
+      id,
+      rating: insertTestimonial.rating ?? 5,
+      displayOrder: insertTestimonial.displayOrder ?? 0,
+      isActive: insertTestimonial.isActive ?? true,
+    };
+    this.testimonials.set(id, testimonial);
+    return testimonial;
+  }
+
+  async updateTestimonial(id: string, updates: Partial<InsertTestimonial>): Promise<Testimonial | undefined> {
+    const existing = this.testimonials.get(id);
+    if (!existing) return undefined;
+
+    const updated: Testimonial = {
+      ...existing,
+      ...updates,
+      id,
+    };
+    this.testimonials.set(id, updated);
+    return updated;
+  }
+
+  async deleteTestimonial(id: string): Promise<boolean> {
+    return this.testimonials.delete(id);
   }
 }
 
