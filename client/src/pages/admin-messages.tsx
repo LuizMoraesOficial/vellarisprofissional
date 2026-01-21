@@ -299,7 +299,13 @@ export default function AdminMessages() {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => window.open(`mailto:${selectedContact.email}`, "_blank")}
+                  onClick={() => {
+                    const subject = encodeURIComponent("Re: Contato via site VELLARIS");
+                    const body = encodeURIComponent(
+                      `Olá ${selectedContact.name},\n\nRecebemos sua mensagem através do site VELLARIS e estamos entrando em contato para ajudá-lo(a).\n\n---\nMensagem original:\n${selectedContact.message}\n`
+                    );
+                    window.location.href = `mailto:${selectedContact.email}?subject=${subject}&body=${body}`;
+                  }}
                   className="border-gold/30 text-gold hover:bg-gold/10"
                   data-testid="button-reply-email"
                 >
