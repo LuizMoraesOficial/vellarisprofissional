@@ -646,7 +646,7 @@ export default function AdminSections() {
       </main>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-gray-900 border-gray-800 max-w-lg">
+        <DialogContent className="bg-gray-900 border-gray-800 max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white">
               {editingSection ? "Editar Seção" : "Nova Seção Personalizada"}
@@ -796,7 +796,7 @@ export default function AdminSections() {
       </Dialog>
 
       <Dialog open={isItemDialogOpen} onOpenChange={setIsItemDialogOpen}>
-        <DialogContent className="bg-gray-900 border-gray-800 max-w-lg">
+        <DialogContent className="bg-gray-900 border-gray-800 max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white">
               {editingItem ? "Editar Item" : "Novo Item"}
