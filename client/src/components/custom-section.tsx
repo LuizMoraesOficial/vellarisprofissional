@@ -1,3 +1,4 @@
+import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,159 @@ function extractYouTubeId(url: string): string | null {
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
   const match = url.match(regExp);
   return match && match[2].length === 11 ? match[2] : null;
+}
+
+function YouTubePlayer({ videoId, title }: { videoId: string; title: string }) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [volume, setVolume] = useState(100);
+  const [isMuted, setIsMuted] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+  
+  const sendCommand = (func: string, args?: unknown) => {
+    if (iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.postMessage(
+        JSON.stringify({ event: 'command', func, args: args || [] }),
+        '*'
+      );
+    }
+  };
+  
+  const togglePlay = () => {
+    if (isPaused) {
+      sendCommand('playVideo');
+      setIsPaused(false);
+    } else {
+      sendCommand('pauseVideo');
+      setIsPaused(true);
+    }
+  };
+  
+  const toggleMute = () => {
+    if (isMuted) {
+      sendCommand('unMute');
+      sendCommand('setVolume', [volume]);
+      setIsMuted(false);
+    } else {
+      sendCommand('mute');
+      setIsMuted(true);
+    }
+  };
+  
+  const handleVolumeChange = (newVolume: number) => {
+    setVolume(newVolume);
+    sendCommand('setVolume', [newVolume]);
+    if (newVolume === 0) {
+      setIsMuted(true);
+    } else if (isMuted) {
+      sendCommand('unMute');
+      setIsMuted(false);
+    }
+  };
+  
+  if (!isPlaying) {
+    return (
+      <div 
+        className="aspect-video relative cursor-pointer group"
+        onClick={() => setIsPlaying(true)}
+      >
+        <img
+          src={thumbnailUrl}
+          alt={title}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+          }}
+        />
+        <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+          <div className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Play className="w-8 h-8 text-white fill-white ml-1" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="aspect-video relative overflow-hidden bg-black group">
+      {/* YouTube iframe with controls hidden */}
+      <iframe
+        ref={iframeRef}
+        src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&fs=0&disablekb=1&playsinline=1&enablejsapi=1&origin=${window.location.origin}`}
+        className="absolute w-full h-full"
+        style={{ 
+          top: '-60px',
+          height: 'calc(100% + 120px)',
+          pointerEvents: 'none'
+        }}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media"
+        allowFullScreen={false}
+      />
+      
+      {/* Custom controls overlay */}
+      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-20">
+        <div className="flex items-center gap-4">
+          {/* Play/Pause button */}
+          <button 
+            onClick={togglePlay}
+            className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+          >
+            {isPaused ? (
+              <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+            ) : (
+              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="6" y="4" width="4" height="16" />
+                <rect x="14" y="4" width="4" height="16" />
+              </svg>
+            )}
+          </button>
+          
+          {/* Volume controls */}
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={toggleMute}
+              className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+            >
+              {isMuted || volume === 0 ? (
+                <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                  <line x1="23" y1="9" x2="17" y2="15" />
+                  <line x1="17" y1="9" x2="23" y2="15" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                </svg>
+              )}
+            </button>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={isMuted ? 0 : volume}
+              onChange={(e) => handleVolumeChange(Number(e.target.value))}
+              className="w-20 h-1 bg-white/30 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+            />
+          </div>
+        </div>
+      </div>
+      
+      {/* Center play button when paused */}
+      {isPaused && (
+        <div 
+          className="absolute inset-0 flex items-center justify-center cursor-pointer z-10"
+          onClick={togglePlay}
+        >
+          <div className="w-16 h-16 rounded-full bg-black/50 flex items-center justify-center">
+            <Play className="w-8 h-8 text-white fill-white ml-1" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function GallerySection({ section }: { section: SectionWithItems }) {
@@ -138,15 +292,7 @@ function VideoSection({ section }: { section: SectionWithItems }) {
             return (
               <Card key={item.id} className="overflow-hidden border-0 bg-card hover-elevate" data-testid={`video-item-${item.id}`}>
                 {videoId ? (
-                  <div className="aspect-video">
-                    <iframe
-                      src={`https://www.youtube.com/embed/${videoId}`}
-                      className="w-full h-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      data-testid={`iframe-video-${item.id}`}
-                    />
-                  </div>
+                  <YouTubePlayer videoId={videoId} title={item.title} />
                 ) : item.image ? (
                   <div className="aspect-video relative cursor-pointer">
                     <img
