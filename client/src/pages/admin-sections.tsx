@@ -505,14 +505,17 @@ export default function AdminSections() {
                 ))}
               </div>
             ) : (
-              <Card className="bg-gray-900/50 border-gray-800">
+              <Card className="bg-gray-900/50 border-gray-800 border-amber-500/30">
                 <CardContent className="flex flex-col items-center justify-center py-16">
-                  <LayoutGrid className="w-12 h-12 text-gray-500 mb-4" />
+                  <LayoutGrid className="w-12 h-12 text-amber-500 mb-4" />
                   <h3 className="text-lg font-medium text-gray-300 mb-2">
-                    Nenhum item nesta seção
+                    Esta seção ainda não tem itens
                   </h3>
-                  <p className="text-gray-500 text-center max-w-md mb-4">
-                    Adicione itens para que apareçam nesta seção no site.
+                  <p className="text-gray-400 text-center max-w-md mb-2">
+                    A seção só será exibida no site quando tiver pelo menos um item.
+                  </p>
+                  <p className="text-amber-500/80 text-sm text-center max-w-md mb-6">
+                    Adicione itens abaixo para ativar a seção na página inicial.
                   </p>
                   <Button
                     onClick={() => {
@@ -614,26 +617,40 @@ export default function AdminSections() {
                       </CardHeader>
                       <CardContent>
                         <p className="text-gray-400 text-sm mb-4">{section.title}</p>
-                        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex flex-col gap-3">
                           <Button
-                            variant="outline"
                             size="sm"
-                            onClick={() => handleEdit(section)}
-                            className="border-gold/30 text-gold"
-                            data-testid={`button-edit-section-${section.id}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenSection(section);
+                            }}
+                            className="w-full bg-gold text-black"
+                            data-testid={`button-manage-items-${section.id}`}
                           >
-                            <Pencil className="w-4 h-4 mr-1" />
-                            Editar
+                            <LayoutGrid className="w-4 h-4 mr-2" />
+                            Gerenciar Itens
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDeleteSection(section)}
-                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                            data-testid={`button-delete-section-${section.id}`}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                          <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEdit(section)}
+                              className="border-gold/30 text-gold flex-1"
+                              data-testid={`button-edit-section-${section.id}`}
+                            >
+                              <Pencil className="w-4 h-4 mr-1" />
+                              Editar
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setDeleteSection(section)}
+                              className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                              data-testid={`button-delete-section-${section.id}`}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
