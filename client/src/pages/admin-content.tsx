@@ -312,14 +312,29 @@ export default function AdminContent() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-gray-300">Imagem de Fundo (URL)</Label>
-                    <Input
-                      value={testimonialsForm.testimonialsSectionImage}
-                      onChange={(e) => setTestimonialsForm({ ...testimonialsForm, testimonialsSectionImage: e.target.value })}
-                      placeholder="https://example.com/image.jpg"
-                      className="bg-gray-800 border-gray-700 text-white focus:border-gold"
-                      data-testid="input-testimonials-image"
-                    />
+                    <Label className="text-gray-300">Imagem de Fundo (URL - opcional)</Label>
+                    <p className="text-xs text-gray-500">Deixe vazio para exibir os depoimentos em grade centralizada</p>
+                    <div className="flex gap-2">
+                      <Input
+                        value={testimonialsForm.testimonialsSectionImage}
+                        onChange={(e) => setTestimonialsForm({ ...testimonialsForm, testimonialsSectionImage: e.target.value })}
+                        placeholder="https://example.com/image.jpg"
+                        className="bg-gray-800 border-gray-700 text-white focus:border-gold flex-1"
+                        data-testid="input-testimonials-image"
+                      />
+                      {testimonialsForm.testimonialsSectionImage && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setTestimonialsForm({ ...testimonialsForm, testimonialsSectionImage: "" })}
+                          className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+                          data-testid="button-clear-testimonials-image"
+                        >
+                          Remover
+                        </Button>
+                      )}
+                    </div>
                     {testimonialsForm.testimonialsSectionImage && (
                       <div className="mt-2 rounded-lg overflow-hidden h-32 bg-gray-800">
                         <img 
