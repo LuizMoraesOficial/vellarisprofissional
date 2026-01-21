@@ -16,6 +16,9 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import AdminLines from "@/pages/admin-lines";
 import AdminSettings from "@/pages/admin-settings";
 import AdminMessages from "@/pages/admin-messages";
+import AdminFeatures from "@/pages/admin-features";
+import AdminTestimonials from "@/pages/admin-testimonials";
+import AdminContent from "@/pages/admin-content";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -31,6 +34,9 @@ function Router() {
       <Route path="/admin/linhas" component={AdminLines} />
       <Route path="/admin/configuracoes" component={AdminSettings} />
       <Route path="/admin/mensagens" component={AdminMessages} />
+      <Route path="/admin/destaques" component={AdminFeatures} />
+      <Route path="/admin/depoimentos" component={AdminTestimonials} />
+      <Route path="/admin/conteudo" component={AdminContent} />
       <Route component={NotFound} />
     </Switch>
   );
