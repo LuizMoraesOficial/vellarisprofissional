@@ -497,6 +497,45 @@ function ProductsCustomSection({ section }: { section: SectionWithItems }) {
 }
 
 
+function ParagraphsSection({ section }: { section: SectionWithItems }) {
+  return (
+    <section className="py-24 bg-background" data-testid={`section-paragraphs-${section.slug}`}>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          {section.label && (
+            <span className="text-primary text-sm font-medium uppercase tracking-widest" data-testid={`text-section-label-${section.slug}`}>
+              {section.label}
+            </span>
+          )}
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium mt-4 mb-6" data-testid={`text-section-title-${section.slug}`}>
+            {section.title}
+          </h2>
+          {section.subtitle && (
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto" data-testid={`text-section-subtitle-${section.slug}`}>
+              {section.subtitle}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-12">
+          {section.items.map((item) => (
+            <div key={item.id} className="text-center" data-testid={`paragraph-item-${item.id}`}>
+              <h3 className="font-serif text-xl sm:text-2xl font-medium mb-4 text-foreground" data-testid={`text-paragraph-title-${item.id}`}>
+                {item.title}
+              </h3>
+              {item.description && (
+                <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-3xl mx-auto" data-testid={`text-paragraph-desc-${item.id}`}>
+                  {item.description}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function renderSectionByType(section: SectionWithItems) {
   if (section.type === "products") {
     if (!section.products || section.products.length === 0) return null;
@@ -514,6 +553,8 @@ function renderSectionByType(section: SectionWithItems) {
       return <PostsSection section={section} />;
     case "highlights":
       return <HighlightsSection section={section} />;
+    case "paragraphs":
+      return <ParagraphsSection section={section} />;
     default:
       return null;
   }

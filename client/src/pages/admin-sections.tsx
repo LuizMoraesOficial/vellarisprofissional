@@ -70,6 +70,7 @@ const sectionTypes = [
   { value: "videos", label: "Vídeos", icon: Video },
   { value: "posts", label: "Posts/Novidades", icon: FileText },
   { value: "highlights", label: "Destaques", icon: Star },
+  { value: "paragraphs", label: "Parágrafos/Texto", icon: FileText },
 ];
 
 const positionOptions = [
