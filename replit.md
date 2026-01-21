@@ -44,10 +44,12 @@ The server handles:
 - **Database Ready**: Schema configured for PostgreSQL migration
 
 The schema includes:
+- `features` table: id, icon, title, description, displayOrder, isActive - for homepage benefits section
+- `testimonials` table: id, name, role, content, rating, displayOrder, isActive - for homepage testimonials section
 - `productLines` table: id, slug (unique), name, description, longDescription, heroImage, featuredImage, accentColor, isActive, displayOrder
 - `products` table: id, name, description, category, line (references product line slug), price, showPrice, image, benefits array, featured flag
 - `contacts` table: id, name, email, phone, message, createdAt timestamp
-- `siteSettings` table: id, contactEmail, contactPhone, whatsapp, instagram, facebook, youtube, tiktok, address, logoUrl, heroImage, heroTitle, heroSubtitle
+- `siteSettings` table: id, contactEmail, contactPhone, whatsapp, instagram, facebook, youtube, tiktok, address, logoUrl, heroImage, heroTitle, heroSubtitle, plus section-specific content fields (benefitsSectionTitle, ctaSectionTitle, contactPageTitle, footerDescription, etc.)
 
 ## Admin Panel
 
@@ -55,10 +57,13 @@ The admin panel is accessible via hidden routes (no public links):
 - `/admin` - Login page (requires ADMIN_PASSWORD secret)
 - `/admin/dashboard` - Product management (CRUD)
 - `/admin/linhas` - Product line management (CRUD with images, colors, ordering)
-- `/admin/mensagens` - View and manage contact form submissions
+- `/admin/destaques` - Features/highlights management for homepage benefits section
+- `/admin/depoimentos` - Testimonials management with name, role, content, rating
+- `/admin/conteudo` - Site content management (CTA section, contact page, footer text)
+- `/admin/mensagens` - View and manage contact form submissions with WhatsApp reply feature
 - `/admin/configuracoes` - Edit site settings (contact info, social media links, logo, hero images)
 
-Admin authentication uses bearer tokens stored in localStorage with 24-hour expiry. The admin navigation provides seamless movement between sections with a premium dark theme and golden accents.
+Admin authentication uses bearer tokens stored in localStorage with 24-hour expiry. The admin navigation provides seamless movement between sections with a premium dark theme and golden accents. The messages section includes a WhatsApp reply button that opens wa.me with a pre-filled greeting message.
 
 ### Shared Code
 The `shared/` directory contains code used by both frontend and backend:
