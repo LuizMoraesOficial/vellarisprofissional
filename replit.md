@@ -49,7 +49,9 @@ The schema includes:
 - `productLines` table: id, slug (unique), name, description, longDescription, heroImage, featuredImage, accentColor, isActive, displayOrder
 - `products` table: id, name, description, category, line (references product line slug), price, showPrice, image, benefits array, featured flag
 - `contacts` table: id, name, email, phone, message, createdAt timestamp
-- `siteSettings` table: id, contactEmail, contactPhone, whatsapp, instagram, facebook, youtube, tiktok, address, logoUrl, heroImage, heroTitle, heroSubtitle, plus section-specific content fields (benefitsSectionTitle, ctaSectionTitle, contactPageTitle, footerDescription, etc.)
+- `siteSettings` table: id, contactEmail, contactPhone, whatsapp, instagram, facebook, youtube, tiktok, address, logoUrl, heroImage, heroTitle, heroSubtitle, plus section-specific content fields (benefitsSectionTitle, ctaSectionTitle, contactPageTitle, footerDescription, featuredProductsSectionEnabled, etc.)
+- `customSections` table: id, name, slug (unique), type (products/gallery/videos/posts/highlights), title, subtitle, label, position (after-hero/after-product-lines/before-benefits/after-benefits/before-testimonials), displayOrder, isActive
+- `customSectionItems` table: id, sectionId (references customSections.id), title, description, image, videoUrl, link, displayOrder, isActive
 
 ## Admin Panel
 
@@ -60,8 +62,9 @@ The admin panel is accessible via hidden routes (no public links):
 - `/admin/destaques` - Features/highlights management for homepage benefits section
 - `/admin/depoimentos` - Testimonials management with name, role, content, rating
 - `/admin/conteudo` - Site content management (CTA section, contact page, footer text)
-- `/admin/mensagens` - View and manage contact form submissions with WhatsApp reply feature
-- `/admin/configuracoes` - Edit site settings (contact info, social media links, logo, hero images)
+- `/admin/secoes` - Custom sections management (create dynamic homepage sections with products, gallery, videos, posts, or highlights content types)
+- `/admin/mensagens` - View and manage contact form submissions with WhatsApp/email reply features
+- `/admin/configuracoes` - Edit site settings (contact info, social media links, logo, hero images, toggle featured products section)
 
 Admin authentication uses bearer tokens stored in localStorage with 24-hour expiry. The admin navigation provides seamless movement between sections with a premium dark theme and golden accents. The messages section includes a WhatsApp reply button that opens wa.me with a pre-filled greeting message.
 
