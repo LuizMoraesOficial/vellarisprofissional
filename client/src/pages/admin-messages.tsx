@@ -125,6 +125,14 @@ export default function AdminMessages() {
       return;
     }
     const formattedPhone = formatPhoneForWhatsApp(contact.phone);
+    if (formattedPhone.length < 10) {
+      toast({
+        title: "Número inválido",
+        description: "O número de telefone informado não é válido para WhatsApp.",
+        variant: "destructive",
+      });
+      return;
+    }
     const message = encodeURIComponent(
       `Olá ${contact.name}! Recebemos sua mensagem através do site VELLARIS e estamos entrando em contato para ajudá-lo(a).`
     );

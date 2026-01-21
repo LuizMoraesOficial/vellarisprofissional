@@ -13,6 +13,9 @@ interface PublicSettings {
   youtube: string | null;
   tiktok: string | null;
   address: string | null;
+  ctaSectionTitle: string | null;
+  ctaSectionSubtitle: string | null;
+  footerDescription: string | null;
 }
 
 export function Footer() {
@@ -25,20 +28,20 @@ export function Footer() {
       <section className="relative bg-background dark:bg-gray-950 py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground dark:text-white mb-6 leading-tight">
-            Pronto para transformar seus cabelos?
+            {settings?.ctaSectionTitle || "Pronto para transformar seus cabelos?"}
           </h2>
           <p className="text-muted-foreground dark:text-gray-400 text-lg max-w-2xl mx-auto mb-10">
-            Entre em contato conosco e descubra como os produtos VELLARIS podem elevar os resultados do seu salão ou cuidados pessoais.
+            {settings?.ctaSectionSubtitle || "Entre em contato conosco e descubra como os produtos VELLARIS podem elevar os resultados do seu salão ou cuidados pessoais."}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link href="/contato">
-              <Button className="bg-primary dark:bg-gold text-primary-foreground dark:text-black hover:bg-primary/90 dark:hover:bg-gold/90 gap-2 px-8 h-12 text-base font-semibold golden-glow">
+              <Button className="bg-primary dark:bg-gold text-primary-foreground dark:text-black gap-2 px-8 h-12 text-base font-semibold golden-glow">
                 Fale Conosco
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
             <Link href="/produtos">
-              <Button variant="ghost" className="text-foreground dark:text-white hover:bg-muted dark:hover:bg-gray-800 gap-2 px-8 h-12 text-base font-medium">
+              <Button variant="ghost" className="text-foreground dark:text-white gap-2 px-8 h-12 text-base font-medium">
                 Ver Catálogo
               </Button>
             </Link>
@@ -76,8 +79,7 @@ export function Footer() {
                 </div>
               </div>
               <p className="text-background/70 dark:text-gray-400 text-sm leading-relaxed">
-                Linha profissional de cuidados capilares para resultados extraordinários. 
-                Tecnologia avançada para cabelos saudáveis e brilhantes.
+                {settings?.footerDescription || "Linha profissional de cuidados capilares para resultados extraordinários. Tecnologia avançada para cabelos saudáveis e brilhantes."}
               </p>
             </div>
 

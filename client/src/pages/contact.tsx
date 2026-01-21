@@ -11,12 +11,27 @@ interface PublicSettings {
   youtube: string | null;
   tiktok: string | null;
   address: string | null;
+  contactPageTitle: string | null;
+  contactPageSubtitle: string | null;
+  contactPageLabel: string | null;
+  contactPageProfessionalTitle: string | null;
+  contactPageProfessionalText: string | null;
+  contactPageProfessionalEmail: string | null;
 }
 
 export default function Contact() {
   const { data: settings, isLoading } = useQuery<PublicSettings>({
     queryKey: ["/api/settings/public"],
   });
+
+  const pageLabel = settings?.contactPageLabel || "Fale Conosco";
+  const pageTitle = settings?.contactPageTitle || "Entre em Contato";
+  const pageSubtitle = settings?.contactPageSubtitle || 
+    "Estamos aqui para ajudar. Envie sua mensagem e nossa equipe entrará em contato o mais breve possível.";
+  const professionalTitle = settings?.contactPageProfessionalTitle || "Para Profissionais";
+  const professionalText = settings?.contactPageProfessionalText || 
+    "Se você é proprietário de salão ou profissional da beleza, temos condições especiais para você. Entre em contato para conhecer nossa linha profissional e condições de parceria.";
+  const professionalEmail = settings?.contactPageProfessionalEmail || "profissionais@vellaris.com.br";
 
   const contactInfo = [
     {
@@ -51,14 +66,13 @@ export default function Contact() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="text-primary text-sm font-medium uppercase tracking-widest">
-              Fale Conosco
+              {pageLabel}
             </span>
             <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium mt-4 mb-6">
-              Entre em Contato
+              {pageTitle}
             </h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Estamos aqui para ajudar. Envie sua mensagem e nossa equipe 
-              entrará em contato o mais breve possível.
+              {pageSubtitle}
             </p>
           </div>
         </div>
@@ -98,15 +112,13 @@ export default function Contact() {
               )}
 
               <div className="bg-card rounded-md p-6">
-                <h3 className="font-medium mb-4">Para Profissionais</h3>
+                <h3 className="font-medium mb-4">{professionalTitle}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-                  Se você é proprietário de salão ou profissional da beleza, 
-                  temos condições especiais para você. Entre em contato para 
-                  conhecer nossa linha profissional e condições de parceria.
+                  {professionalText}
                 </p>
                 <p className="text-sm">
                   <span className="text-muted-foreground">Email exclusivo: </span>
-                  <span className="text-primary">profissionais@vellaris.com.br</span>
+                  <span className="text-primary">{professionalEmail}</span>
                 </p>
               </div>
             </div>
