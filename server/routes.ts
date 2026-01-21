@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContactSchema, insertProductSchema, insertSettingsSchema, insertProductLineSchema, insertFeatureSchema, insertTestimonialSchema } from "@shared/schema";
+import { insertContactSchema, insertProductSchema, insertSettingsSchema, insertProductLineSchema, insertFeatureSchema, insertTestimonialSchema, insertCustomSectionSchema, insertCustomSectionItemSchema } from "@shared/schema";
 import { z } from "zod";
 import { randomBytes } from "crypto";
 
@@ -548,6 +548,173 @@ export async function registerRoutes(
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete testimonial" });
+    }
+  });
+
+  // Custom Sections Routes (Public)
+  app.get("/api/custom-sections", async (req, res) => {
+    try {
+      const sections = await storage.getAllCustomSections();
+      const activeSections = sections.filter(s => s.isActive);
+      const sectionsWithItems = await Promise.all(
+        activeSections.map(async (section) => {
+          const items = await storage.getItemsBySectionId(section.id);
+          const activeItems = items.filter(i => i.isActive);
+          return { ...section, items: activeItems };
+        })
+      );
+      res.json(sectionsWithItems);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch custom sections" });
+    }
+  });
+
+  app.get("/api/custom-sections/:slug", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const section = await storage.getCustomSectionBySlug(slug);
+      if (!section || !section.isActive) {
+        return res.status(404).json({ error: "Section not found" });
+      }
+      const items = await storage.getItemsBySectionId(section.id);
+      const activeItems = items.filter(i => i.isActive);
+      res.json({ ...section, items: activeItems });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch custom section" });
+    }
+  });
+
+  // Custom Sections Admin Routes
+  app.get("/api/admin/custom-sections", verifyAdminToken, async (req, res) => {
+    try {
+      const sections = await storage.getAllCustomSections();
+      res.json(sections);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch custom sections" });
+    }
+  });
+
+  app.get("/api/admin/custom-sections/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const section = await storage.getCustomSectionById(id);
+      if (!section) {
+        return res.status(404).json({ error: "Section not found" });
+      }
+      const items = await storage.getItemsBySectionId(id);
+      res.json({ ...section, items });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch custom section" });
+    }
+  });
+
+  app.post("/api/admin/custom-sections", verifyAdminToken, async (req, res) => {
+    try {
+      const validatedData = insertCustomSectionSchema.parse(req.body);
+      const section = await storage.createCustomSection(validatedData);
+      res.status(201).json(section);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create custom section" });
+    }
+  });
+
+  app.put("/api/admin/custom-sections/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateSchema = insertCustomSectionSchema.partial();
+      const validatedUpdates = updateSchema.parse(req.body);
+      
+      const section = await storage.updateCustomSection(id, validatedUpdates);
+      
+      if (!section) {
+        return res.status(404).json({ error: "Section not found" });
+      }
+      
+      res.json(section);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update custom section" });
+    }
+  });
+
+  app.delete("/api/admin/custom-sections/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteCustomSection(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ error: "Section not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete custom section" });
+    }
+  });
+
+  // Custom Section Items Routes
+  app.get("/api/admin/custom-sections/:sectionId/items", verifyAdminToken, async (req, res) => {
+    try {
+      const { sectionId } = req.params;
+      const items = await storage.getItemsBySectionId(sectionId);
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch section items" });
+    }
+  });
+
+  app.post("/api/admin/custom-sections/:sectionId/items", verifyAdminToken, async (req, res) => {
+    try {
+      const { sectionId } = req.params;
+      const validatedData = insertCustomSectionItemSchema.parse({ ...req.body, sectionId });
+      const item = await storage.createCustomSectionItem(validatedData);
+      res.status(201).json(item);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create section item" });
+    }
+  });
+
+  app.put("/api/admin/section-items/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateSchema = insertCustomSectionItemSchema.partial();
+      const validatedUpdates = updateSchema.parse(req.body);
+      
+      const item = await storage.updateCustomSectionItem(id, validatedUpdates);
+      
+      if (!item) {
+        return res.status(404).json({ error: "Item not found" });
+      }
+      
+      res.json(item);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update section item" });
+    }
+  });
+
+  app.delete("/api/admin/section-items/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteCustomSectionItem(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ error: "Item not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete section item" });
     }
   });
 

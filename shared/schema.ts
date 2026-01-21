@@ -2,6 +2,31 @@ import { pgTable, text, varchar, integer, boolean, timestamp } from "drizzle-orm
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+export const customSections = pgTable("custom_sections", {
+  id: varchar("id", { length: 50 }).primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  type: text("type").notNull().default("products"),
+  title: text("title").notNull(),
+  subtitle: text("subtitle"),
+  label: text("label"),
+  displayOrder: integer("display_order").default(0),
+  isActive: boolean("is_active").default(true),
+  position: text("position").notNull().default("after-product-lines"),
+});
+
+export const customSectionItems = pgTable("custom_section_items", {
+  id: varchar("id", { length: 50 }).primaryKey(),
+  sectionId: varchar("section_id", { length: 50 }).notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  image: text("image"),
+  videoUrl: text("video_url"),
+  link: text("link"),
+  displayOrder: integer("display_order").default(0),
+  isActive: boolean("is_active").default(true),
+});
+
 export const features = pgTable("features", {
   id: varchar("id", { length: 50 }).primaryKey(),
   icon: text("icon").notNull().default("sparkles"),
@@ -92,6 +117,8 @@ export const siteSettings = pgTable("site_settings", {
   footerDescription: text("footer_description"),
 });
 
+export const insertCustomSectionSchema = createInsertSchema(customSections).omit({ id: true });
+export const insertCustomSectionItemSchema = createInsertSchema(customSectionItems).omit({ id: true });
 export const insertFeatureSchema = createInsertSchema(features).omit({ id: true });
 export const insertTestimonialSchema = createInsertSchema(testimonials).omit({ id: true });
 export const insertProductLineSchema = createInsertSchema(productLines).omit({ id: true });
@@ -99,6 +126,10 @@ export const insertProductSchema = createInsertSchema(products).omit({ id: true 
 export const insertContactSchema = createInsertSchema(contacts).omit({ id: true, createdAt: true });
 export const insertSettingsSchema = createInsertSchema(siteSettings).omit({ id: true });
 
+export type InsertCustomSection = z.infer<typeof insertCustomSectionSchema>;
+export type CustomSection = typeof customSections.$inferSelect;
+export type InsertCustomSectionItem = z.infer<typeof insertCustomSectionItemSchema>;
+export type CustomSectionItem = typeof customSectionItems.$inferSelect;
 export type InsertFeature = z.infer<typeof insertFeatureSchema>;
 export type Feature = typeof features.$inferSelect;
 export type InsertTestimonial = z.infer<typeof insertTestimonialSchema>;

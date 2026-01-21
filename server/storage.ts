@@ -10,7 +10,11 @@ import {
   type Feature,
   type InsertFeature,
   type Testimonial,
-  type InsertTestimonial
+  type InsertTestimonial,
+  type CustomSection,
+  type InsertCustomSection,
+  type CustomSectionItem,
+  type InsertCustomSectionItem
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -44,6 +48,17 @@ export interface IStorage {
   createTestimonial(testimonial: InsertTestimonial): Promise<Testimonial>;
   updateTestimonial(id: string, updates: Partial<InsertTestimonial>): Promise<Testimonial | undefined>;
   deleteTestimonial(id: string): Promise<boolean>;
+  getAllCustomSections(): Promise<CustomSection[]>;
+  getCustomSectionById(id: string): Promise<CustomSection | undefined>;
+  getCustomSectionBySlug(slug: string): Promise<CustomSection | undefined>;
+  createCustomSection(section: InsertCustomSection): Promise<CustomSection>;
+  updateCustomSection(id: string, updates: Partial<InsertCustomSection>): Promise<CustomSection | undefined>;
+  deleteCustomSection(id: string): Promise<boolean>;
+  getItemsBySectionId(sectionId: string): Promise<CustomSectionItem[]>;
+  getCustomSectionItemById(id: string): Promise<CustomSectionItem | undefined>;
+  createCustomSectionItem(item: InsertCustomSectionItem): Promise<CustomSectionItem>;
+  updateCustomSectionItem(id: string, updates: Partial<InsertCustomSectionItem>): Promise<CustomSectionItem | undefined>;
+  deleteCustomSectionItem(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -52,12 +67,16 @@ export class MemStorage implements IStorage {
   private productLines: Map<string, ProductLine>;
   private features: Map<string, Feature>;
   private testimonials: Map<string, Testimonial>;
+  private customSections: Map<string, CustomSection>;
+  private customSectionItems: Map<string, CustomSectionItem>;
   private settings: SiteSettings;
 
   constructor() {
     this.products = new Map();
     this.contacts = new Map();
     this.productLines = new Map();
+    this.customSections = new Map();
+    this.customSectionItems = new Map();
     this.features = new Map();
     this.testimonials = new Map();
     this.settings = {
@@ -515,6 +534,99 @@ export class MemStorage implements IStorage {
 
   async deleteTestimonial(id: string): Promise<boolean> {
     return this.testimonials.delete(id);
+  }
+
+  async getAllCustomSections(): Promise<CustomSection[]> {
+    const sections = Array.from(this.customSections.values());
+    return sections.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+  }
+
+  async getCustomSectionById(id: string): Promise<CustomSection | undefined> {
+    return this.customSections.get(id);
+  }
+
+  async getCustomSectionBySlug(slug: string): Promise<CustomSection | undefined> {
+    return Array.from(this.customSections.values()).find(s => s.slug === slug);
+  }
+
+  async createCustomSection(insertSection: InsertCustomSection): Promise<CustomSection> {
+    const id = randomUUID();
+    const section: CustomSection = {
+      ...insertSection,
+      id,
+      type: insertSection.type || "products",
+      subtitle: insertSection.subtitle || null,
+      label: insertSection.label || null,
+      displayOrder: insertSection.displayOrder ?? 0,
+      isActive: insertSection.isActive ?? true,
+      position: insertSection.position || "after-product-lines",
+    };
+    this.customSections.set(id, section);
+    return section;
+  }
+
+  async updateCustomSection(id: string, updates: Partial<InsertCustomSection>): Promise<CustomSection | undefined> {
+    const existing = this.customSections.get(id);
+    if (!existing) return undefined;
+
+    const updated: CustomSection = {
+      ...existing,
+      ...updates,
+      id,
+    };
+    this.customSections.set(id, updated);
+    return updated;
+  }
+
+  async deleteCustomSection(id: string): Promise<boolean> {
+    const items = await this.getItemsBySectionId(id);
+    for (const item of items) {
+      this.customSectionItems.delete(item.id);
+    }
+    return this.customSections.delete(id);
+  }
+
+  async getItemsBySectionId(sectionId: string): Promise<CustomSectionItem[]> {
+    const items = Array.from(this.customSectionItems.values())
+      .filter(item => item.sectionId === sectionId);
+    return items.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+  }
+
+  async getCustomSectionItemById(id: string): Promise<CustomSectionItem | undefined> {
+    return this.customSectionItems.get(id);
+  }
+
+  async createCustomSectionItem(insertItem: InsertCustomSectionItem): Promise<CustomSectionItem> {
+    const id = randomUUID();
+    const item: CustomSectionItem = {
+      ...insertItem,
+      id,
+      description: insertItem.description || null,
+      image: insertItem.image || null,
+      videoUrl: insertItem.videoUrl || null,
+      link: insertItem.link || null,
+      displayOrder: insertItem.displayOrder ?? 0,
+      isActive: insertItem.isActive ?? true,
+    };
+    this.customSectionItems.set(id, item);
+    return item;
+  }
+
+  async updateCustomSectionItem(id: string, updates: Partial<InsertCustomSectionItem>): Promise<CustomSectionItem | undefined> {
+    const existing = this.customSectionItems.get(id);
+    if (!existing) return undefined;
+
+    const updated: CustomSectionItem = {
+      ...existing,
+      ...updates,
+      id,
+    };
+    this.customSectionItems.set(id, updated);
+    return updated;
+  }
+
+  async deleteCustomSectionItem(id: string): Promise<boolean> {
+    return this.customSectionItems.delete(id);
   }
 }
 

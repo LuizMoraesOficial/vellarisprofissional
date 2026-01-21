@@ -19,6 +19,7 @@ import AdminMessages from "@/pages/admin-messages";
 import AdminFeatures from "@/pages/admin-features";
 import AdminTestimonials from "@/pages/admin-testimonials";
 import AdminContent from "@/pages/admin-content";
+import AdminSections from "@/pages/admin-sections";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -37,6 +38,7 @@ function Router() {
       <Route path="/admin/destaques" component={AdminFeatures} />
       <Route path="/admin/depoimentos" component={AdminTestimonials} />
       <Route path="/admin/conteudo" component={AdminContent} />
+      <Route path="/admin/secoes" component={AdminSections} />
       <Route component={NotFound} />
     </Switch>
   );

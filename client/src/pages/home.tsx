@@ -4,6 +4,7 @@ import { ProductLinesSection } from "@/components/product-lines-section";
 import { ProductsSection } from "@/components/products-section";
 import { BenefitsSection } from "@/components/benefits-section";
 import { TestimonialsSection } from "@/components/testimonials-section";
+import { CustomSectionsList } from "@/components/custom-section";
 
 interface HomeSettings {
   featuredProductsSectionEnabled: boolean | null;
@@ -22,9 +23,14 @@ export default function Home() {
   return (
     <main>
       <HeroSection />
+      <CustomSectionsList position="after-hero" />
       <ProductLinesSection />
+      <CustomSectionsList position="after-product-lines" />
       {showFeaturedProducts && <ProductsSection />}
+      <CustomSectionsList position="before-benefits" />
       <BenefitsSection />
+      <CustomSectionsList position="after-benefits" />
+      <CustomSectionsList position="before-testimonials" />
       <TestimonialsSection />
     </main>
   );
