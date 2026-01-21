@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
 import { 
   ArrowRight, 
   Play, 
@@ -19,7 +20,7 @@ import {
   Sun,
   Moon
 } from "lucide-react";
-import type { CustomSection, CustomSectionItem } from "@shared/schema";
+import type { CustomSection, CustomSectionItem, Product } from "@shared/schema";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   sparkles: Sparkles,
@@ -42,6 +43,7 @@ const getIconComponent = (iconName: string) => iconMap[iconName] || Sparkles;
 
 interface SectionWithItems extends CustomSection {
   items: CustomSectionItem[];
+  products?: Product[];
 }
 
 function extractYouTubeId(url: string): string | null {
@@ -292,6 +294,8 @@ function HighlightsSection({ section }: { section: SectionWithItems }) {
 }
 
 function ProductsCustomSection({ section }: { section: SectionWithItems }) {
+  const products = section.products || [];
+  
   return (
     <section className="py-24 bg-background" data-testid={`section-products-${section.slug}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -312,47 +316,34 @@ function ProductsCustomSection({ section }: { section: SectionWithItems }) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {section.items.map((item) => {
-            const IconComponent = item.icon ? getIconComponent(item.icon) : null;
-            const hasVisual = IconComponent || item.image;
-            
-            return (
-              <Card key={item.id} className="overflow-hidden border-0 bg-card hover-elevate" data-testid={`product-item-${item.id}`}>
-                {IconComponent ? (
-                  <div className="p-6 pb-0">
-                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                      <IconComponent className="w-8 h-8 text-primary" data-testid={`icon-product-${item.id}`} />
-                    </div>
-                  </div>
-                ) : item.image ? (
+          {products.map((product) => (
+            <Link key={product.id} href={`/produtos/${product.line}/${product.id}`}>
+              <Card className="overflow-hidden border-0 bg-card hover-elevate cursor-pointer" data-testid={`product-item-${product.id}`}>
+                {product.image && (
                   <div className="aspect-square overflow-hidden">
                     <img
-                      src={item.image}
-                      alt={item.title}
+                      src={product.image}
+                      alt={product.name}
                       className="w-full h-full object-cover"
-                      data-testid={`img-product-${item.id}`}
+                      data-testid={`img-product-${product.id}`}
                     />
                   </div>
-                ) : null}
+                )}
                 <div className="p-6">
-                  <h3 className="font-serif text-xl font-medium mb-2" data-testid={`text-product-title-${item.id}`}>
-                    {item.title}
+                  <h3 className="font-serif text-xl font-medium mb-2" data-testid={`text-product-title-${product.id}`}>
+                    {product.name}
                   </h3>
-                  {item.description && (
-                    <p className="text-muted-foreground text-sm mb-4" data-testid={`text-product-desc-${item.id}`}>
-                      {item.description}
-                    </p>
-                  )}
-                  {item.link && (
-                    <Button variant="ghost" size="sm" data-testid={`product-link-${item.id}`}>
-                      Ver detalhes
-                      <ArrowRight className="ml-1 h-4 w-4" />
-                    </Button>
-                  )}
+                  <p className="text-muted-foreground text-sm mb-4 line-clamp-2" data-testid={`text-product-desc-${product.id}`}>
+                    {product.description}
+                  </p>
+                  <Button variant="ghost" size="sm" data-testid={`product-link-${product.id}`}>
+                    Ver detalhes
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Button>
                 </div>
               </Card>
-            );
-          })}
+            </Link>
+          ))}
         </div>
       </div>
     </section>
@@ -361,6 +352,11 @@ function ProductsCustomSection({ section }: { section: SectionWithItems }) {
 
 
 function renderSectionByType(section: SectionWithItems) {
+  if (section.type === "products") {
+    if (!section.products || section.products.length === 0) return null;
+    return <ProductsCustomSection section={section} />;
+  }
+  
   if (!section.items || section.items.length === 0) return null;
   
   switch (section.type) {
@@ -372,9 +368,8 @@ function renderSectionByType(section: SectionWithItems) {
       return <PostsSection section={section} />;
     case "highlights":
       return <HighlightsSection section={section} />;
-    case "products":
     default:
-      return <ProductsCustomSection section={section} />;
+      return null;
   }
 }
 

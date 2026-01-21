@@ -14,7 +14,8 @@ import {
   type CustomSection,
   type InsertCustomSection,
   type CustomSectionItem,
-  type InsertCustomSectionItem
+  type InsertCustomSectionItem,
+  type CustomSectionProduct
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -59,6 +60,8 @@ export interface IStorage {
   createCustomSectionItem(item: InsertCustomSectionItem): Promise<CustomSectionItem>;
   updateCustomSectionItem(id: string, updates: Partial<InsertCustomSectionItem>): Promise<CustomSectionItem | undefined>;
   deleteCustomSectionItem(id: string): Promise<boolean>;
+  getProductsBySectionId(sectionId: string): Promise<CustomSectionProduct[]>;
+  setProductsForSection(sectionId: string, productIds: string[]): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -627,6 +630,14 @@ export class MemStorage implements IStorage {
 
   async deleteCustomSectionItem(id: string): Promise<boolean> {
     return this.customSectionItems.delete(id);
+  }
+
+  async getProductsBySectionId(_sectionId: string): Promise<CustomSectionProduct[]> {
+    return [];
+  }
+
+  async setProductsForSection(_sectionId: string, _productIds: string[]): Promise<void> {
+    // MemStorage doesn't support section products, use DatabaseStorage
   }
 }
 

@@ -61,7 +61,8 @@ import {
   Sun,
   Moon
 } from "lucide-react";
-import type { CustomSection, CustomSectionItem } from "@shared/schema";
+import type { CustomSection, CustomSectionItem, Product, CustomSectionProduct } from "@shared/schema";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const sectionTypes = [
   { value: "products", label: "Produtos", icon: Package },
@@ -103,6 +104,7 @@ const getIconComponent = (iconName: string) => {
 
 interface SectionWithItems extends CustomSection {
   items?: CustomSectionItem[];
+  productIds?: string[];
 }
 
 export default function AdminSections() {
@@ -117,6 +119,7 @@ export default function AdminSections() {
   const [isItemDialogOpen, setIsItemDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<CustomSectionItem | null>(null);
   const [deleteItem, setDeleteItem] = useState<CustomSectionItem | null>(null);
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -161,6 +164,53 @@ export default function AdminSections() {
       }
       if (!res.ok) throw new Error("Failed to fetch sections");
       return res.json();
+    },
+  });
+
+  const { data: allProducts } = useQuery<Product[]>({
+    queryKey: ["/api/products"],
+    enabled: !!token,
+  });
+
+  const { data: sectionProducts, refetch: refetchSectionProducts } = useQuery<CustomSectionProduct[]>({
+    queryKey: ["/api/admin/custom-sections", selectedSection?.id, "products"],
+    enabled: !!token && !!selectedSection && selectedSection.type === "products",
+    queryFn: async () => {
+      if (!selectedSection) return [];
+      const res = await fetch(`/api/admin/custom-sections/${selectedSection.id}/products`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
+
+  useEffect(() => {
+    if (sectionProducts) {
+      setSelectedProductIds(sectionProducts.map(sp => sp.productId));
+    }
+  }, [sectionProducts]);
+
+  const saveProductsMutation = useMutation({
+    mutationFn: async ({ sectionId, productIds }: { sectionId: string; productIds: string[] }) => {
+      const res = await apiRequest("PUT", `/api/admin/custom-sections/${sectionId}/products`, { productIds }, {
+        Authorization: `Bearer ${token}`,
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      refetchSectionProducts();
+      toast({
+        title: "Sucesso!",
+        description: "Produtos da seção atualizados.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Falha ao atualizar produtos da seção.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -475,24 +525,110 @@ export default function AdminSections() {
                   {selectedSection.name}
                 </h1>
                 <p className="text-gray-400">
-                  Gerencie os itens desta seção personalizada.
+                  {selectedSection.type === "products" 
+                    ? "Selecione os produtos que serão exibidos nesta seção." 
+                    : "Gerencie os itens desta seção personalizada."}
                 </p>
               </div>
-              <Button
-                onClick={() => {
-                  resetItemForm();
-                  setEditingItem(null);
-                  setIsItemDialogOpen(true);
-                }}
-                className="bg-gold text-black gap-2"
-                data-testid="button-add-item"
-              >
-                <Plus className="w-4 h-4" />
-                Adicionar Item
-              </Button>
+              {selectedSection.type !== "products" && (
+                <Button
+                  onClick={() => {
+                    resetItemForm();
+                    setEditingItem(null);
+                    setIsItemDialogOpen(true);
+                  }}
+                  className="bg-gold text-black gap-2"
+                  data-testid="button-add-item"
+                >
+                  <Plus className="w-4 h-4" />
+                  Adicionar Item
+                </Button>
+              )}
             </div>
 
-            {selectedSection.items && selectedSection.items.length > 0 ? (
+            {selectedSection.type === "products" ? (
+              <Card className="bg-gray-900/50 border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-white">Selecionar Produtos</CardTitle>
+                  <CardDescription>
+                    Marque os produtos que deseja exibir nesta seção. Apenas produtos cadastrados aparecerão aqui.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {allProducts && allProducts.length > 0 ? (
+                    <>
+                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
+                        {allProducts.map((product) => (
+                          <div
+                            key={product.id}
+                            className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                              selectedProductIds.includes(product.id)
+                                ? "border-gold bg-gold/10"
+                                : "border-gray-700 hover:border-gray-600"
+                            }`}
+                            onClick={() => {
+                              setSelectedProductIds(prev =>
+                                prev.includes(product.id)
+                                  ? prev.filter(id => id !== product.id)
+                                  : [...prev, product.id]
+                              );
+                            }}
+                            data-testid={`product-checkbox-${product.id}`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <Checkbox
+                                checked={selectedProductIds.includes(product.id)}
+                                className="mt-1"
+                              />
+                              <div className="flex-1">
+                                {product.image && (
+                                  <div className="w-full aspect-square rounded-lg overflow-hidden mb-2">
+                                    <img
+                                      src={product.image}
+                                      alt={product.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
+                                )}
+                                <p className="text-white font-medium">{product.name}</p>
+                                <p className="text-gray-400 text-sm">{product.category}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex justify-between items-center pt-4 border-t border-gray-700">
+                        <p className="text-gray-400 text-sm">
+                          {selectedProductIds.length} produto(s) selecionado(s)
+                        </p>
+                        <Button
+                          onClick={() => {
+                            if (selectedSection) {
+                              saveProductsMutation.mutate({
+                                sectionId: selectedSection.id,
+                                productIds: selectedProductIds
+                              });
+                            }
+                          }}
+                          disabled={saveProductsMutation.isPending}
+                          className="bg-gold text-black gap-2"
+                          data-testid="button-save-products"
+                        >
+                          {saveProductsMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                          Salvar Seleção
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Package className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                      <p className="text-gray-400">Nenhum produto cadastrado.</p>
+                      <p className="text-gray-500 text-sm">Cadastre produtos no menu "Produtos" primeiro.</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ) : selectedSection.items && selectedSection.items.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {selectedSection.items.map((item) => (
                   <Card

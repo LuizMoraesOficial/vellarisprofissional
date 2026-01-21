@@ -51,7 +51,8 @@ The schema includes:
 - `contacts` table: id, name, email, phone, message, createdAt timestamp
 - `siteSettings` table: id, contactEmail, contactPhone, whatsapp, instagram, facebook, youtube, tiktok, address, logoUrl, heroImage, heroTitle, heroSubtitle, plus section-specific content fields (benefitsSectionTitle, ctaSectionTitle, contactPageTitle, footerDescription, featuredProductsSectionEnabled, etc.)
 - `customSections` table: id, name, slug (unique), type (products/gallery/videos/posts/highlights), title, subtitle, label, position (after-hero/after-product-lines/before-benefits/after-benefits/before-testimonials), displayOrder, isActive
-- `customSectionItems` table: id, sectionId (references customSections.id), title, description, image, videoUrl, link, displayOrder, isActive
+- `customSectionItems` table: id, sectionId (references customSections.id), title, description, icon (optional icon name), image, videoUrl, link, displayOrder, isActive
+- `customSectionProducts` table: sectionId, productId - junction table for "products" type sections that link to existing products instead of custom items
 
 ## Admin Panel
 
@@ -62,7 +63,7 @@ The admin panel is accessible via hidden routes (no public links):
 - `/admin/destaques` - Features/highlights management for homepage benefits section
 - `/admin/depoimentos` - Testimonials management with name, role, content, rating
 - `/admin/conteudo` - Site content management (CTA section, contact page, footer text)
-- `/admin/secoes` - Custom sections management (create dynamic homepage sections with products, gallery, videos, posts, or highlights content types)
+- `/admin/secoes` - Custom sections management (create dynamic homepage sections with products, gallery, videos, posts, or highlights content types). For "products" type sections, select existing products from the database. For other types, create personalized items with icons or images.
 - `/admin/mensagens` - View and manage contact form submissions with WhatsApp/email reply features
 - `/admin/configuracoes` - Edit site settings (contact info, social media links, logo, hero images, toggle featured products section)
 
