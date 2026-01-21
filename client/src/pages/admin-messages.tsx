@@ -35,6 +35,7 @@ import {
   Loader2,
   Inbox
 } from "lucide-react";
+import { SiWhatsapp } from "react-icons/si";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Contact } from "@shared/schema";
@@ -101,6 +102,33 @@ export default function AdminMessages() {
   const formatDate = (date: Date | string | null) => {
     if (!date) return "Data não disponível";
     return format(new Date(date), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR });
+  };
+
+  const formatPhoneForWhatsApp = (phone: string) => {
+    const cleaned = phone.replace(/\D/g, "");
+    if (cleaned.startsWith("55")) {
+      return cleaned;
+    }
+    if (cleaned.length === 11 || cleaned.length === 10) {
+      return `55${cleaned}`;
+    }
+    return cleaned;
+  };
+
+  const handleWhatsAppReply = (contact: Contact) => {
+    if (!contact.phone) {
+      toast({
+        title: "Sem telefone",
+        description: "Este contato não informou número de telefone.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const formattedPhone = formatPhoneForWhatsApp(contact.phone);
+    const message = encodeURIComponent(
+      `Olá ${contact.name}! Recebemos sua mensagem através do site VELLARIS e estamos entrando em contato para ajudá-lo(a).`
+    );
+    window.open(`https://wa.me/${formattedPhone}?text=${message}`, "_blank");
   };
 
   if (!token) return null;
@@ -265,11 +293,21 @@ export default function AdminMessages() {
                   variant="outline"
                   onClick={() => window.open(`mailto:${selectedContact.email}`, "_blank")}
                   className="border-gold/30 text-gold hover:bg-gold/10"
-                  data-testid="button-reply-message"
+                  data-testid="button-reply-email"
                 >
                   <Mail className="w-4 h-4 mr-2" />
-                  Responder
+                  Responder por Email
                 </Button>
+                {selectedContact.phone && (
+                  <Button
+                    onClick={() => handleWhatsAppReply(selectedContact)}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                    data-testid="button-reply-whatsapp"
+                  >
+                    <SiWhatsapp className="w-4 h-4 mr-2" />
+                    Responder via WhatsApp
+                  </Button>
+                )}
               </div>
             </div>
           )}
