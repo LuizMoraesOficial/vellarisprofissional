@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContactSchema, insertProductSchema, insertSettingsSchema, insertProductLineSchema } from "@shared/schema";
+import { insertContactSchema, insertProductSchema, insertSettingsSchema, insertProductLineSchema, insertFeatureSchema, insertTestimonialSchema } from "@shared/schema";
 import { z } from "zod";
 import { randomBytes } from "crypto";
 
@@ -251,6 +251,22 @@ export async function registerRoutes(
         fiberForceImage: settings.fiberForceImage,
         hydraBalanceImage: settings.hydraBalanceImage,
         nutriOilImage: settings.nutriOilImage,
+        benefitsSectionTitle: settings.benefitsSectionTitle,
+        benefitsSectionSubtitle: settings.benefitsSectionSubtitle,
+        benefitsSectionLabel: settings.benefitsSectionLabel,
+        testimonialsSectionTitle: settings.testimonialsSectionTitle,
+        testimonialsSectionSubtitle: settings.testimonialsSectionSubtitle,
+        testimonialsSectionLabel: settings.testimonialsSectionLabel,
+        testimonialsSectionImage: settings.testimonialsSectionImage,
+        ctaSectionTitle: settings.ctaSectionTitle,
+        ctaSectionSubtitle: settings.ctaSectionSubtitle,
+        contactPageTitle: settings.contactPageTitle,
+        contactPageSubtitle: settings.contactPageSubtitle,
+        contactPageLabel: settings.contactPageLabel,
+        contactPageProfessionalTitle: settings.contactPageProfessionalTitle,
+        contactPageProfessionalText: settings.contactPageProfessionalText,
+        contactPageProfessionalEmail: settings.contactPageProfessionalEmail,
+        footerDescription: settings.footerDescription,
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch settings" });
@@ -365,6 +381,172 @@ export async function registerRoutes(
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete product line" });
+    }
+  });
+
+  app.get("/api/features", async (req, res) => {
+    try {
+      const features = await storage.getAllFeatures();
+      const activeFeatures = features.filter(f => f.isActive);
+      res.json(activeFeatures);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch features" });
+    }
+  });
+
+  app.get("/api/admin/features", verifyAdminToken, async (req, res) => {
+    try {
+      const features = await storage.getAllFeatures();
+      res.json(features);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch features" });
+    }
+  });
+
+  app.get("/api/admin/features/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const feature = await storage.getFeatureById(id);
+      
+      if (!feature) {
+        return res.status(404).json({ error: "Feature not found" });
+      }
+      
+      res.json(feature);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch feature" });
+    }
+  });
+
+  app.post("/api/admin/features", verifyAdminToken, async (req, res) => {
+    try {
+      const validatedData = insertFeatureSchema.parse(req.body);
+      const feature = await storage.createFeature(validatedData);
+      res.status(201).json(feature);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create feature" });
+    }
+  });
+
+  app.put("/api/admin/features/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateSchema = insertFeatureSchema.partial();
+      const validatedUpdates = updateSchema.parse(req.body);
+      
+      const feature = await storage.updateFeature(id, validatedUpdates);
+      
+      if (!feature) {
+        return res.status(404).json({ error: "Feature not found" });
+      }
+      
+      res.json(feature);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update feature" });
+    }
+  });
+
+  app.delete("/api/admin/features/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteFeature(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ error: "Feature not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete feature" });
+    }
+  });
+
+  app.get("/api/testimonials", async (req, res) => {
+    try {
+      const testimonials = await storage.getAllTestimonials();
+      const activeTestimonials = testimonials.filter(t => t.isActive);
+      res.json(activeTestimonials);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch testimonials" });
+    }
+  });
+
+  app.get("/api/admin/testimonials", verifyAdminToken, async (req, res) => {
+    try {
+      const testimonials = await storage.getAllTestimonials();
+      res.json(testimonials);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch testimonials" });
+    }
+  });
+
+  app.get("/api/admin/testimonials/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const testimonial = await storage.getTestimonialById(id);
+      
+      if (!testimonial) {
+        return res.status(404).json({ error: "Testimonial not found" });
+      }
+      
+      res.json(testimonial);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch testimonial" });
+    }
+  });
+
+  app.post("/api/admin/testimonials", verifyAdminToken, async (req, res) => {
+    try {
+      const validatedData = insertTestimonialSchema.parse(req.body);
+      const testimonial = await storage.createTestimonial(validatedData);
+      res.status(201).json(testimonial);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create testimonial" });
+    }
+  });
+
+  app.put("/api/admin/testimonials/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateSchema = insertTestimonialSchema.partial();
+      const validatedUpdates = updateSchema.parse(req.body);
+      
+      const testimonial = await storage.updateTestimonial(id, validatedUpdates);
+      
+      if (!testimonial) {
+        return res.status(404).json({ error: "Testimonial not found" });
+      }
+      
+      res.json(testimonial);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update testimonial" });
+    }
+  });
+
+  app.delete("/api/admin/testimonials/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteTestimonial(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ error: "Testimonial not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete testimonial" });
     }
   });
 
