@@ -46,7 +46,20 @@ import {
   Video,
   FileText,
   Star,
-  Package
+  Package,
+  Sparkles,
+  Leaf,
+  Shield,
+  Droplets,
+  Zap,
+  Heart,
+  Award,
+  CheckCircle,
+  Gem,
+  Crown,
+  Flame,
+  Sun,
+  Moon
 } from "lucide-react";
 import type { CustomSection, CustomSectionItem } from "@shared/schema";
 
@@ -65,6 +78,28 @@ const positionOptions = [
   { value: "after-benefits", label: "Após os Benefícios" },
   { value: "before-testimonials", label: "Antes dos Depoimentos" },
 ];
+
+const iconOptions = [
+  { value: "sparkles", label: "Brilho", icon: Sparkles },
+  { value: "leaf", label: "Folha/Natural", icon: Leaf },
+  { value: "shield", label: "Escudo/Proteção", icon: Shield },
+  { value: "droplets", label: "Gotas/Hidratação", icon: Droplets },
+  { value: "zap", label: "Energia", icon: Zap },
+  { value: "heart", label: "Coração", icon: Heart },
+  { value: "star", label: "Estrela", icon: Star },
+  { value: "award", label: "Prêmio", icon: Award },
+  { value: "check-circle", label: "Check", icon: CheckCircle },
+  { value: "gem", label: "Diamante", icon: Gem },
+  { value: "crown", label: "Coroa", icon: Crown },
+  { value: "flame", label: "Chama", icon: Flame },
+  { value: "sun", label: "Sol", icon: Sun },
+  { value: "moon", label: "Lua", icon: Moon },
+];
+
+const getIconComponent = (iconName: string) => {
+  const found = iconOptions.find(opt => opt.value === iconName);
+  return found ? found.icon : Sparkles;
+};
 
 interface SectionWithItems extends CustomSection {
   items?: CustomSectionItem[];
@@ -97,11 +132,14 @@ export default function AdminSections() {
   const [itemFormData, setItemFormData] = useState({
     title: "",
     description: "",
+    icon: "",
     image: "",
     videoUrl: "",
     link: "",
     isActive: true,
   });
+
+  const [itemVisualType, setItemVisualType] = useState<"icon" | "image">("image");
 
   useEffect(() => {
     if (!token) {
@@ -317,11 +355,13 @@ export default function AdminSections() {
     setItemFormData({
       title: "",
       description: "",
+      icon: "",
       image: "",
       videoUrl: "",
       link: "",
       isActive: true,
     });
+    setItemVisualType("image");
   };
 
   const handleEdit = (section: CustomSection) => {
@@ -341,9 +381,12 @@ export default function AdminSections() {
 
   const handleEditItem = (item: CustomSectionItem) => {
     setEditingItem(item);
+    const hasIcon = !!(item as any).icon;
+    setItemVisualType(hasIcon ? "icon" : "image");
     setItemFormData({
       title: item.title,
       description: item.description || "",
+      icon: (item as any).icon || "",
       image: item.image || "",
       videoUrl: item.videoUrl || "",
       link: item.link || "",
@@ -852,19 +895,74 @@ export default function AdminSections() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="itemImage" className="text-gray-300">URL da Imagem (opcional)</Label>
-              <Input
-                id="itemImage"
-                value={itemFormData.image}
-                onChange={(e) => setItemFormData({ ...itemFormData, image: e.target.value })}
-                className="bg-gray-800 border-gray-700 text-white"
-                placeholder="https://exemplo.com/imagem.jpg"
-                data-testid="input-item-image"
-              />
-              {itemFormData.image && (
-                <div className="mt-2 rounded-lg overflow-hidden border border-gray-700 h-32">
-                  <img src={itemFormData.image} alt="Preview" className="w-full h-full object-cover" />
+            <div className="space-y-3">
+              <Label className="text-gray-300">Visual do Item</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={itemVisualType === "icon" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setItemVisualType("icon")}
+                  className={itemVisualType === "icon" ? "bg-gold text-black" : "border-gray-700 text-gray-300"}
+                  data-testid="button-visual-icon"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Ícone
+                </Button>
+                <Button
+                  type="button"
+                  variant={itemVisualType === "image" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setItemVisualType("image")}
+                  className={itemVisualType === "image" ? "bg-gold text-black" : "border-gray-700 text-gray-300"}
+                  data-testid="button-visual-image"
+                >
+                  <Image className="w-4 h-4 mr-2" />
+                  Imagem
+                </Button>
+              </div>
+
+              {itemVisualType === "icon" ? (
+                <div className="space-y-2">
+                  <Label htmlFor="itemIcon" className="text-gray-300">Ícone</Label>
+                  <Select
+                    value={itemFormData.icon || "sparkles"}
+                    onValueChange={(value) => setItemFormData({ ...itemFormData, icon: value, image: "" })}
+                  >
+                    <SelectTrigger className="bg-gray-800 border-gray-700 text-white" data-testid="select-item-icon">
+                      <SelectValue placeholder="Selecione um ícone" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-700">
+                      {iconOptions.map((option) => {
+                        const IconComponent = option.icon;
+                        return (
+                          <SelectItem key={option.value} value={option.value} className="text-white hover:bg-gray-700">
+                            <div className="flex items-center gap-2">
+                              <IconComponent className="w-4 h-4 text-gold" />
+                              {option.label}
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="itemImage" className="text-gray-300">URL da Imagem</Label>
+                  <Input
+                    id="itemImage"
+                    value={itemFormData.image}
+                    onChange={(e) => setItemFormData({ ...itemFormData, image: e.target.value, icon: "" })}
+                    className="bg-gray-800 border-gray-700 text-white"
+                    placeholder="https://exemplo.com/imagem.jpg"
+                    data-testid="input-item-image"
+                  />
+                  {itemFormData.image && (
+                    <div className="mt-2 rounded-lg overflow-hidden border border-gray-700 h-32">
+                      <img src={itemFormData.image} alt="Preview" className="w-full h-full object-cover" />
+                    </div>
+                  )}
                 </div>
               )}
             </div>

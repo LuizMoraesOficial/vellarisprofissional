@@ -20,6 +20,7 @@ export const customSectionItems = pgTable("custom_section_items", {
   sectionId: varchar("section_id", { length: 50 }).notNull(),
   title: text("title").notNull(),
   description: text("description"),
+  icon: text("icon"),
   image: text("image"),
   videoUrl: text("video_url"),
   link: text("link"),

@@ -1,8 +1,44 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Play } from "lucide-react";
+import { 
+  ArrowRight, 
+  Play, 
+  Sparkles, 
+  Leaf, 
+  Shield, 
+  Droplets, 
+  Zap, 
+  Heart, 
+  Star, 
+  Award,
+  CheckCircle,
+  Gem,
+  Crown,
+  Flame,
+  Sun,
+  Moon
+} from "lucide-react";
 import type { CustomSection, CustomSectionItem } from "@shared/schema";
+
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  sparkles: Sparkles,
+  leaf: Leaf,
+  shield: Shield,
+  droplets: Droplets,
+  zap: Zap,
+  heart: Heart,
+  star: Star,
+  award: Award,
+  "check-circle": CheckCircle,
+  gem: Gem,
+  crown: Crown,
+  flame: Flame,
+  sun: Sun,
+  moon: Moon,
+};
+
+const getIconComponent = (iconName: string) => iconMap[iconName] || Sparkles;
 
 interface SectionWithItems extends CustomSection {
   items: CustomSectionItem[];
@@ -206,24 +242,31 @@ function HighlightsSection({ section }: { section: SectionWithItems }) {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {section.items.map((item) => (
-            <Card key={item.id} className="text-center p-6 border-0 bg-card hover-elevate" data-testid={`highlight-item-${item.id}`}>
-              {item.image && (
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover"
-                    data-testid={`img-highlight-${item.id}`}
-                  />
-                </div>
-              )}
-              <h3 className="font-medium text-lg mb-2" data-testid={`text-highlight-title-${item.id}`}>{item.title}</h3>
-              {item.description && (
-                <p className="text-muted-foreground text-sm" data-testid={`text-highlight-desc-${item.id}`}>{item.description}</p>
-              )}
-            </Card>
-          ))}
+          {section.items.map((item) => {
+            const IconComponent = item.icon ? getIconComponent(item.icon) : null;
+            return (
+              <Card key={item.id} className="text-center p-6 border-0 bg-card hover-elevate" data-testid={`highlight-item-${item.id}`}>
+                {IconComponent ? (
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                    <IconComponent className="w-8 h-8 text-primary" data-testid={`icon-highlight-${item.id}`} />
+                  </div>
+                ) : item.image ? (
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover"
+                      data-testid={`img-highlight-${item.id}`}
+                    />
+                  </div>
+                ) : null}
+                <h3 className="font-medium text-lg mb-2" data-testid={`text-highlight-title-${item.id}`}>{item.title}</h3>
+                {item.description && (
+                  <p className="text-muted-foreground text-sm" data-testid={`text-highlight-desc-${item.id}`}>{item.description}</p>
+                )}
+              </Card>
+            );
+          })}
         </div>
       </div>
     </section>
