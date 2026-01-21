@@ -86,6 +86,7 @@ export class MemStorage implements IStorage {
       testimonialsSectionImage: null,
       ctaSectionTitle: "Pronto para transformar seus cabelos?",
       ctaSectionSubtitle: "Entre em contato conosco e descubra como os produtos VELLARIS podem elevar os resultados do seu salão ou cuidados pessoais.",
+      featuredProductsSectionEnabled: true,
       contactPageTitle: "Entre em Contato",
       contactPageSubtitle: "Estamos aqui para ajudar. Envie sua mensagem e nossa equipe entrará em contato o mais breve possível.",
       contactPageLabel: "Fale Conosco",

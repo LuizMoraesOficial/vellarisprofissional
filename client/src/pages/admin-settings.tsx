@@ -20,8 +20,10 @@ import {
   Youtube,
   Loader2,
   Image,
-  Layout
+  Layout,
+  ToggleLeft
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { SiTiktok } from "react-icons/si";
 import type { SiteSettings } from "@shared/schema";
 
@@ -43,6 +45,7 @@ export default function AdminSettings() {
     heroImage: "",
     heroTitle: "",
     heroSubtitle: "",
+    featuredProductsSectionEnabled: true,
   });
 
   useEffect(() => {
@@ -83,6 +86,7 @@ export default function AdminSettings() {
         heroImage: settings.heroImage || "",
         heroTitle: settings.heroTitle || "",
         heroSubtitle: settings.heroSubtitle || "",
+        featuredProductsSectionEnabled: settings.featuredProductsSectionEnabled ?? true,
       });
     }
   }, [settings]);
@@ -121,7 +125,7 @@ export default function AdminSettings() {
     updateMutation.mutate(formData);
   };
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -234,6 +238,36 @@ export default function AdminSettings() {
                       <img src={formData.logoUrl} alt="Logo Preview" className="h-10 object-contain" />
                     </div>
                   )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gray-900/50 border-gray-800 hover:border-gold/30 transition-all duration-300">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <ToggleLeft className="w-5 h-5 text-gold" />
+                  Seções da Página Inicial
+                </CardTitle>
+                <CardDescription>
+                  Ative ou desative seções da página inicial do site.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-4 rounded-lg bg-gray-800/50 border border-gray-700">
+                  <div className="space-y-1">
+                    <Label htmlFor="featuredProductsSectionEnabled" className="text-gray-200 font-medium">
+                      Produtos em Destaque
+                    </Label>
+                    <p className="text-sm text-gray-400">
+                      Exibe a seção "Produtos em Destaque" na página inicial
+                    </p>
+                  </div>
+                  <Switch
+                    id="featuredProductsSectionEnabled"
+                    checked={formData.featuredProductsSectionEnabled}
+                    onCheckedChange={(checked) => handleChange("featuredProductsSectionEnabled", checked)}
+                    data-testid="switch-featured-products"
+                  />
                 </div>
               </CardContent>
             </Card>

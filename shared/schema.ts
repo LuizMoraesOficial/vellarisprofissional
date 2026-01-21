@@ -82,6 +82,7 @@ export const siteSettings = pgTable("site_settings", {
   testimonialsSectionImage: text("testimonials_section_image"),
   ctaSectionTitle: text("cta_section_title"),
   ctaSectionSubtitle: text("cta_section_subtitle"),
+  featuredProductsSectionEnabled: boolean("featured_products_section_enabled").default(true),
   contactPageTitle: text("contact_page_title"),
   contactPageSubtitle: text("contact_page_subtitle"),
   contactPageLabel: text("contact_page_label"),
