@@ -500,7 +500,14 @@ export default function AdminSections() {
                     className="bg-gray-900/50 border-gray-800 hover:border-gold/30 transition-all duration-300"
                     data-testid={`card-item-${item.id}`}
                   >
-                    {item.image && (
+                    {(item as any).icon ? (
+                      <div className="aspect-video flex items-center justify-center bg-gray-800/50 rounded-t-lg">
+                        {(() => {
+                          const IconComp = getIconComponent((item as any).icon);
+                          return <IconComp className="w-12 h-12 text-gold" />;
+                        })()}
+                      </div>
+                    ) : item.image ? (
                       <div className="aspect-video overflow-hidden rounded-t-lg">
                         <img
                           src={item.image}
@@ -508,7 +515,7 @@ export default function AdminSections() {
                           className="w-full h-full object-cover"
                         />
                       </div>
-                    )}
+                    ) : null}
                     <CardHeader className="pb-2">
                       <div className="flex items-start justify-between">
                         <CardTitle className="text-white text-lg" data-testid={`text-item-title-${item.id}`}>{item.title}</CardTitle>
@@ -902,7 +909,10 @@ export default function AdminSections() {
                   type="button"
                   variant={itemVisualType === "icon" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setItemVisualType("icon")}
+                  onClick={() => {
+                    setItemVisualType("icon");
+                    setItemFormData({ ...itemFormData, icon: itemFormData.icon || "sparkles", image: "" });
+                  }}
                   className={itemVisualType === "icon" ? "bg-gold text-black" : "border-gray-700 text-gray-300"}
                   data-testid="button-visual-icon"
                 >
@@ -913,7 +923,10 @@ export default function AdminSections() {
                   type="button"
                   variant={itemVisualType === "image" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setItemVisualType("image")}
+                  onClick={() => {
+                    setItemVisualType("image");
+                    setItemFormData({ ...itemFormData, icon: "", image: itemFormData.image });
+                  }}
                   className={itemVisualType === "image" ? "bg-gold text-black" : "border-gray-700 text-gray-300"}
                   data-testid="button-visual-image"
                 >
