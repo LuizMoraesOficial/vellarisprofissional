@@ -1,67 +1,63 @@
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles, Droplets, Sun } from "lucide-react";
+import { ArrowRight, Sparkles, Loader2 } from "lucide-react";
+import type { ProductLine } from "@shared/schema";
 
-interface PublicSettings {
-  fiberForceImage?: string | null;
-  hydraBalanceImage?: string | null;
-  nutriOilImage?: string | null;
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
 }
 
-const productLines = [
-  {
-    id: "fiber-force",
-    name: "Fiber Force",
-    description: "Reconstrução profissional para cabelos danificados e quebradiços. Tecnologia de aminoácidos e queratina.",
-    icon: Sparkles,
-    gradient: "from-orange-500 via-orange-400 to-amber-500",
-    bgGradient: "from-orange-500/20 via-orange-400/10 to-transparent",
-    borderColor: "border-orange-500/30",
-    textColor: "text-orange-500",
-    buttonClasses: "bg-orange-500 border-orange-500 text-white",
-    defaultImage: "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=600",
-    settingsKey: "fiberForceImage" as keyof PublicSettings,
-  },
-  {
-    id: "hydra-balance",
-    name: "Hydra Balance",
-    description: "Hidratação profunda e equilíbrio para cabelos secos. Ácido hialurônico e aloe vera.",
-    icon: Droplets,
-    gradient: "from-purple-500 via-purple-400 to-violet-500",
-    bgGradient: "from-purple-500/20 via-purple-400/10 to-transparent",
-    borderColor: "border-purple-500/30",
-    textColor: "text-purple-500",
-    buttonClasses: "bg-purple-500 border-purple-500 text-white",
-    defaultImage: "https://images.unsplash.com/photo-1519735777090-ec97162dc266?w=600",
-    settingsKey: "hydraBalanceImage" as keyof PublicSettings,
-  },
-  {
-    id: "nutri-oil",
-    name: "Nutri Oil",
-    description: "Nutrição e brilho intenso para cabelos opacos. Óleos de argan, macadâmia e pracaxi.",
-    icon: Sun,
-    gradient: "from-yellow-500 via-amber-400 to-yellow-400",
-    bgGradient: "from-yellow-500/20 via-amber-400/10 to-transparent",
-    borderColor: "border-yellow-500/30",
-    textColor: "text-yellow-500",
-    buttonClasses: "bg-yellow-500 border-yellow-500 text-black",
-    defaultImage: "https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=600",
-    settingsKey: "nutriOilImage" as keyof PublicSettings,
-  },
-];
+function isLightColor(hex: string): boolean {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return false;
+  const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
+  return luminance > 0.5;
+}
 
 export function ProductLinesSection() {
-  const { data: settings } = useQuery<PublicSettings>({
-    queryKey: ["/api/settings/public"],
+  const { data: lines, isLoading } = useQuery<ProductLine[]>({
+    queryKey: ["/api/product-lines"],
   });
+
+  const activeLines = lines?.filter(line => line.isActive) || [];
+
+  if (isLoading) {
+    return (
+      <section className="relative py-20 md:py-28 bg-gradient-to-b from-background via-background to-muted/30 dark:from-gray-950 dark:via-gray-950 dark:to-gray-900/50 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-gold" />
+        </div>
+      </section>
+    );
+  }
+
+  if (activeLines.length === 0) {
+    return null;
+  }
 
   return (
     <section className="relative py-20 md:py-28 bg-gradient-to-b from-background via-background to-muted/30 dark:from-gray-950 dark:via-gray-950 dark:to-gray-900/50 overflow-hidden">
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-orange-500/10 rounded-full blur-3xl" />
-        <div className="absolute top-40 right-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-yellow-500/10 rounded-full blur-3xl" />
+        {activeLines.slice(0, 3).map((line, index) => (
+          <div 
+            key={line.id}
+            className="absolute w-72 h-72 rounded-full blur-3xl"
+            style={{ 
+              backgroundColor: `${line.accentColor}20`,
+              top: index === 0 ? '5rem' : index === 1 ? '10rem' : '5rem',
+              left: index === 0 ? '2.5rem' : index === 2 ? '33%' : undefined,
+              right: index === 1 ? '5rem' : undefined,
+            }}
+          />
+        ))}
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -78,32 +74,44 @@ export function ProductLinesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-          {productLines.map((line) => {
-            const Icon = line.icon;
-            const imageUrl = settings?.[line.settingsKey] || line.defaultImage;
+        <div className={`grid grid-cols-1 ${activeLines.length === 2 ? 'md:grid-cols-2 max-w-4xl mx-auto' : activeLines.length >= 3 ? 'md:grid-cols-3' : 'max-w-md mx-auto'} gap-6 lg:gap-8`}>
+          {activeLines.map((line) => {
+            const accentColor = line.accentColor || "#D4AF37";
+            const textIsLight = isLightColor(accentColor);
+            const defaultImage = "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=600";
+            const imageUrl = line.featuredImage || defaultImage;
             
             return (
               <div 
                 key={line.id}
-                className={`group relative overflow-hidden rounded-md border-2 ${line.borderColor} bg-card dark:bg-gray-900/50 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2`}
-                data-testid={`card-line-${line.id}`}
+                className="group relative overflow-hidden rounded-md border-2 bg-card dark:bg-gray-900/50 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2"
+                style={{ borderColor: `${accentColor}50` }}
+                data-testid={`card-line-${line.slug}`}
               >
                 <div className="relative h-48 overflow-hidden">
-                  <div className={`absolute inset-0 bg-gradient-to-br ${line.gradient} opacity-20`} />
+                  <div 
+                    className="absolute inset-0 opacity-20"
+                    style={{ backgroundColor: accentColor }}
+                  />
                   <img 
-                    src={imageUrl || line.defaultImage}
+                    src={imageUrl}
                     alt={line.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  <div className={`absolute inset-0 bg-gradient-to-t from-card dark:from-gray-900 via-transparent to-transparent`} />
-                  <div className={`absolute top-4 left-4 p-3 rounded-xl bg-gradient-to-br ${line.gradient} shadow-lg`}>
-                    <Icon className="w-5 h-5 text-white" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-card dark:from-gray-900 via-transparent to-transparent" />
+                  <div 
+                    className="absolute top-4 left-4 p-3 rounded-xl shadow-lg"
+                    style={{ backgroundColor: accentColor }}
+                  >
+                    <Sparkles className="w-5 h-5 text-white" />
                   </div>
                 </div>
 
                 <div className="p-6">
-                  <h3 className={`font-serif text-2xl font-bold ${line.textColor} mb-2`}>
+                  <h3 
+                    className="font-serif text-2xl font-bold mb-2"
+                    style={{ color: accentColor }}
+                  >
                     {line.name}
                   </h3>
                   
@@ -111,10 +119,15 @@ export function ProductLinesSection() {
                     {line.description}
                   </p>
                   
-                  <Link href={`/linha/${line.id}`}>
+                  <Link href={`/linha/${line.slug}`}>
                     <Button 
-                      className={`w-full ${line.buttonClasses} font-medium shadow-lg group/btn`}
-                      data-testid={`button-line-${line.id}`}
+                      className="w-full font-medium shadow-lg group/btn"
+                      style={{ 
+                        backgroundColor: accentColor, 
+                        borderColor: accentColor,
+                        color: textIsLight ? '#000' : '#fff'
+                      }}
+                      data-testid={`button-line-${line.slug}`}
                     >
                       Explorar linha
                       <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
@@ -122,7 +135,10 @@ export function ProductLinesSection() {
                   </Link>
                 </div>
 
-                <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${line.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                <div 
+                  className="absolute bottom-0 left-0 right-0 h-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ backgroundColor: accentColor }}
+                />
               </div>
             );
           })}
